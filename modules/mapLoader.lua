@@ -2,8 +2,15 @@ local mapLoader = {}
 
 local data = {
     {
-        X = 10,
-        Y = 60,
+        X = 0,
+        Y = 200,
+        W = 200,
+        H = 50
+    },
+
+    {
+        X = 300,
+        Y = 200,
         W = 200,
         H = 50
     }
@@ -15,7 +22,7 @@ function mapLoader:Load(world)
     for _, platform in ipairs(data) do
         local p = {}
         
-        p.body = love.physics.newBody(world, platform.X, platform.Y, "static")
+        p.body = love.physics.newBody(world, platform.X + (platform.W / 2), platform.Y + (platform.H / 2), "static")
         p.shape = love.physics.newRectangleShape(platform.W, platform.H)
         p.fixture = love.physics.newFixture(p.body, p.shape)
         

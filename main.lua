@@ -2,7 +2,7 @@ local sprites = {
     Player = "player.png"
 }
 
-local world = love.physics.newWorld(0, 196, true)
+local world = love.physics.newWorld(0, 5000, true)
 local player = require("modules.player")
 local mapLoader = require("modules.mapLoader")
 

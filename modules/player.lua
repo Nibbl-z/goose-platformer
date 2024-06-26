@@ -1,15 +1,16 @@
 local player = {}
 local movementDirections = {a = {-1,0}, d = {1,0}, space = {0,-1}}
 
-player.speed = 10
+player.speed = 100
 player.direction = 1
-player.jumpHeight = 500
+player.jumpHeight = 3000
  
 
 local jumped = false
 
 function player:Init(world)
     self.body = love.physics.newBody(world, 0, 0, "dynamic")
+    self.body:setLinearDamping(5)
     self.shape = love.physics.newRectangleShape(50, 50)
     self.fixture = love.physics.newFixture(self.body, self.shape)
     
