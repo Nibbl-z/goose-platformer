@@ -17,15 +17,14 @@ end
 
 function love.update(dt)
     world:update(dt)
-
-    player:HandleMovement(dt)
+    
+    player:Update(dt, mapLoader.map)
 end
 
 function love.draw()
     love.graphics.draw(sprites.Player, player.body:getX(), player.body:getY(), 0, player.direction, 1, 25, 25)
     
     for _, p in ipairs(mapLoader.map) do
-        
         love.graphics.polygon("fill", p.body:getWorldPoints(p.shape:getPoints()))
     end
 end
