@@ -2,7 +2,7 @@ local editor = {}
 
 local map = {}
 
-editor.enabled = true
+editor.enabled = false
 
 local camDirections = {
     w = {0,-1}, s = {0,1}, a = {-1, 0}, d = {1,0}
@@ -72,8 +72,18 @@ local buttons = {
         end
     },
     {
-        Sprite = "DeleteMode",
+        Sprite = "PaintMode",
         Transform = {218, 2, 50, 50},
+        IsEnabled = function ()
+            if mode == "paint" then return true else return false end
+        end,
+        Callback = function ()
+            mode = "paint"
+        end
+    },
+    {
+        Sprite = "DeleteMode",
+        Transform = {272, 2, 50, 50},
         IsEnabled = function ()
             if mode == "delete" then return true else return false end
         end,
@@ -83,7 +93,7 @@ local buttons = {
     },
     {
         Sprite = "Save",
-        Transform = {272, 2, 50, 50},
+        Transform = {326, 2, 50, 50},
         IsEnabled = function ()
             return false
         end,
@@ -159,6 +169,7 @@ local sprites = {
     MoveMode = "move_mode.png",
     ScaleMode = "scale_mode.png",
     DeleteMode = "delete_mode.png",
+    PaintMode = "paint_mode.png",
     LavaMode = "lava_mode.png",
     Lava = "lava.png",
     Save = "save.png",
@@ -248,6 +259,18 @@ function love.mousepressed(x, y, button)
             if collision:CheckCollision(x + editor.cameraX, y + editor.cameraY, 5, 5, v.X, v.Y, v.W, v.H) then
                 table.remove(map, i)
                 
+                break
+            end
+        end
+    elseif mode == "paint" then
+        for i, v in ipairs(map) do
+            if collision:CheckCollision(x + editor.cameraX, y + editor.cameraY, 5, 5, v.X, v.Y, v.W, v.H) then
+                local r, g, b = HSVtoRGB(hue, saturation, brightness)
+
+                v.R = r
+                v.G = g
+                v.B = b
+
                 break
             end
         end
@@ -378,7 +401,7 @@ function editor:Draw()
         love.graphics.draw(sprites[b.Sprite], b.Transform[1], b.Transform[2])
     end
     
-    if mode == "place" and platformType == 1 then
+    if (mode == "place" and platformType == 1) or mode == "paint" then
         for _, s in ipairs(rgbaSliders) do
             if s.Sprite == "Saturation" then
                 love.graphics.setColor(1,1,1,1)
