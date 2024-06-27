@@ -62,8 +62,18 @@ local buttons = {
         end
     },
     {
+        Sprite = "ScaleMode",
+        Transform = {164, 2, 50, 50},
+        IsEnabled = function ()
+            if mode == "scale" then return true else return false end
+        end,
+        Callback = function ()
+            mode = "scale"
+        end
+    },
+    {
         Sprite = "DeleteMode",
-        Transform = {160, 2, 50, 50},
+        Transform = {218, 2, 50, 50},
         IsEnabled = function ()
             if mode == "delete" then return true else return false end
         end,
@@ -73,7 +83,7 @@ local buttons = {
     },
     {
         Sprite = "Save",
-        Transform = {214, 2, 50, 50},
+        Transform = {272, 2, 50, 50},
         IsEnabled = function ()
             return false
         end,
@@ -147,6 +157,7 @@ local sprites = {
     SpawnPoint = "player.png",
     PlaceMode = "place_mode.png",
     MoveMode = "move_mode.png",
+    ScaleMode = "scale_mode.png",
     DeleteMode = "delete_mode.png",
     LavaMode = "lava_mode.png",
     Lava = "lava.png",
@@ -240,7 +251,7 @@ function love.mousepressed(x, y, button)
                 break
             end
         end
-    elseif mode == "move" then
+    elseif mode == "move" or mode == "scale" then
         for i, v in ipairs(map) do
             if collision:CheckCollision(x + editor.cameraX, y + editor.cameraY, 5, 5, v.X, v.Y, v.W, v.H) then
                 currentPlatform = v
@@ -249,9 +260,6 @@ function love.mousepressed(x, y, button)
             end
         end
     end
-    
-
-    
 end
 
 function love.mousemoved(x, y, dx, dy)
@@ -292,7 +300,7 @@ function love.mousereleased(x, y, button)
     if currentPlatform == nil then return end
     print(x, y, button)
     
-    if mode == "place" then
+    if mode == "place" or mode == "scale" then
         if currentPlatform .W < 0 then
             currentPlatform.W = -(x + editor.cameraX - currentPlatform.X)
             currentPlatform.X = currentPlatform.X - currentPlatform.W
