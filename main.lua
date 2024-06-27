@@ -24,10 +24,10 @@ function love.update(dt)
 end
 
 function love.draw()
-    love.graphics.draw(sprites.Player, player.body:getX(), player.body:getY(), 0, player.direction, 1, 25, 25)
+    love.graphics.draw(sprites.Player, player.body:getX() - player.cameraX, player.body:getY() - player.cameraY, 0, player.direction, 1, 25, 25)
     
-    for _, p in ipairs(mapLoader.map) do
-        love.graphics.polygon("fill", p.body:getWorldPoints(p.shape:getPoints()))
+    for _, p in ipairs(mapLoader.data) do
+        love.graphics.rectangle("fill", p.X - player.cameraX, p.Y - player.cameraY, p.W, p.H)
     end
 end
 
