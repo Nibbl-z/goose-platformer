@@ -2,7 +2,7 @@ local editor = {}
 
 local map = {}
 
-editor.enabled = false
+editor.enabled = true
 
 local camDirections = {
     w = {0,-1}, s = {0,1}, a = {-1, 0}, d = {1,0}
@@ -82,8 +82,18 @@ local buttons = {
         end
     },
     {
-        Sprite = "DeleteMode",
+        Sprite = "ColorPickMode",
         Transform = {272, 2, 50, 50},
+        IsEnabled = function ()
+            if mode == "colorpick" then return true else return false end
+        end,
+        Callback = function ()
+            mode = "colorpick"
+        end
+    },
+    {
+        Sprite = "DeleteMode",
+        Transform = {326, 2, 50, 50},
         IsEnabled = function ()
             if mode == "delete" then return true else return false end
         end,
@@ -93,7 +103,7 @@ local buttons = {
     },
     {
         Sprite = "Save",
-        Transform = {326, 2, 50, 50},
+        Transform = {380, 2, 50, 50},
         IsEnabled = function ()
             return false
         end,
@@ -170,6 +180,7 @@ local sprites = {
     ScaleMode = "scale_mode.png",
     DeleteMode = "delete_mode.png",
     PaintMode = "paint_mode.png",
+    ColorPickMode = "colorpicker_mode.png",
     LavaMode = "lava_mode.png",
     Lava = "lava.png",
     Save = "save.png",
@@ -199,6 +210,20 @@ function HSVtoRGB(h, s, v)
         r, g, b = c, 0, x
     end
     return r+m, g+m, b+m
+end
+
+function RGBtoHSV(r,g,b)
+    local M, m = math.max( r, g, b ), math.min( r, g, b )
+	local C = M - m
+	local K = 1.0/(6.0 * C)
+	local h = 0.0
+	if C ~= 0.0 then
+		if M == r then     h = ((g - b) * K) % 1.0
+		elseif M == g then h = (b - r) * K + 1.0/3.0
+		else               h = (r - g) * K + 2.0/3.0
+		end
+	end
+	return h, M == 0.0 and 0.0 or C / M, M
 end
 
 function editor:Load()
@@ -279,6 +304,18 @@ function love.mousepressed(x, y, button)
             if collision:CheckCollision(x + editor.cameraX, y + editor.cameraY, 5, 5, v.X, v.Y, v.W, v.H) then
                 currentPlatform = v
                 table.remove(map, i)
+                break
+            end
+        end
+    elseif mode == "colorpick" then
+        for i, v in ipairs(map) do
+            if collision:CheckCollision(x + editor.cameraX, y + editor.cameraY, 5, 5, v.X, v.Y, v.W, v.H) then
+                local h,s,v = RGBtoHSV(v.R, v.G, v.B)
+                print(h,s,v)
+                hue = h
+                saturation = s
+                brightness = v
+
                 break
             end
         end
@@ -401,7 +438,7 @@ function editor:Draw()
         love.graphics.draw(sprites[b.Sprite], b.Transform[1], b.Transform[2])
     end
     
-    if (mode == "place" and platformType == 1) or mode == "paint" then
+    if (mode == "place" and platformType == 1) or mode == "paint" or mode == "colorpick" then
         for _, s in ipairs(rgbaSliders) do
             if s.Sprite == "Saturation" then
                 love.graphics.setColor(1,1,1,1)
