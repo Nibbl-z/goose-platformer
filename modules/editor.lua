@@ -2,7 +2,7 @@ local editor = {}
 
 local map = {}
 
-editor.enabled = false
+editor.enabled = true
 
 local camDirections = {
     w = {0,-1}, s = {0,1}, a = {-1, 0}, d = {1,0}
@@ -10,6 +10,9 @@ local camDirections = {
 editor.cameraX = 0
 editor.cameraY = 0
 editor.camSpeed = 500
+
+local dcX = 0
+local dcY = 0
 
 local currentPlatform
 local mapLoader = require("modules.mapLoader")
@@ -49,8 +52,18 @@ local buttons = {
         end
     },
     {
+        Sprite = "MoveMode",
+        Transform = {110, 2, 50, 50},
+        IsEnabled = function ()
+            if mode == "move" then return true else return false end
+        end,
+        Callback = function ()
+            mode = "move"
+        end
+    },
+    {
         Sprite = "DeleteMode",
-        Transform = {108, 2, 50, 50},
+        Transform = {160, 2, 50, 50},
         IsEnabled = function ()
             if mode == "delete" then return true else return false end
         end,
@@ -60,7 +73,7 @@ local buttons = {
     },
     {
         Sprite = "Save",
-        Transform = {160, 2, 50, 50},
+        Transform = {214, 2, 50, 50},
         IsEnabled = function ()
             return false
         end,
@@ -133,6 +146,7 @@ local rgbaSliders = {
 local sprites = {
     SpawnPoint = "player.png",
     PlaceMode = "place_mode.png",
+    MoveMode = "move_mode.png",
     DeleteMode = "delete_mode.png",
     LavaMode = "lava_mode.png",
     Lava = "lava.png",
@@ -226,13 +240,21 @@ function love.mousepressed(x, y, button)
                 break
             end
         end
+    elseif mode == "move" then
+        for i, v in ipairs(map) do
+            if collision:CheckCollision(x + editor.cameraX, y + editor.cameraY, 5, 5, v.X, v.Y, v.W, v.H) then
+                currentPlatform = v
+                table.remove(map, i)
+                break
+            end
+        end
     end
     
 
     
 end
 
-function love.mousemoved(x, y)
+function love.mousemoved(x, y, dx, dy)
     if editor.enabled == false then return end
     
     for _, s in ipairs(rgbaSliders) do
@@ -246,7 +268,12 @@ function love.mousemoved(x, y)
 
     if currentPlatform == nil then return end
 
-    
+    if mode == "move" then
+        currentPlatform.X = currentPlatform.X + dx + dcX
+        currentPlatform.Y = currentPlatform.Y + dy + dcY
+
+        return
+    end
 
     print(x, y)
     
@@ -261,24 +288,25 @@ function love.mousereleased(x, y, button)
 
     sliding = false
     
-
+    
     if currentPlatform == nil then return end
     print(x, y, button)
     
-    if currentPlatform.W < 0 then
-        currentPlatform.W = -(x + editor.cameraX - currentPlatform.X)
-        currentPlatform.X = currentPlatform.X - currentPlatform.W
-    else
-        currentPlatform.W = x + editor.cameraX - currentPlatform.X
-    end
-
-    if currentPlatform.H < 0 then
-        currentPlatform.H = -(y + editor.cameraY - currentPlatform.Y)
-        currentPlatform.Y = currentPlatform.Y - currentPlatform.H
-    else
-        currentPlatform.H = y + editor.cameraY - currentPlatform.Y
-    end
+    if mode == "place" then
+        if currentPlatform .W < 0 then
+            currentPlatform.W = -(x + editor.cameraX - currentPlatform.X)
+            currentPlatform.X = currentPlatform.X - currentPlatform.W
+        else
+            currentPlatform.W = x + editor.cameraX - currentPlatform.X
+        end
     
+        if currentPlatform.H < 0 then
+            currentPlatform.H = -(y + editor.cameraY - currentPlatform.Y)
+            currentPlatform.Y = currentPlatform.Y - currentPlatform.H
+        else
+            currentPlatform.H = y + editor.cameraY - currentPlatform.Y
+        end
+    end
     
     table.insert(map, currentPlatform)
     
@@ -287,13 +315,23 @@ function love.mousereleased(x, y, button)
     print(mapLoader:TableToGoose(map))
 end
 
-function editor:Update(dt)
+function editor:Update(dt)  
+    dcX = 0
+    dcY = 0
+
     for key, mult in pairs(camDirections) do
         if love.keyboard.isDown(key) then
             self.cameraX = self.cameraX + mult[1] * dt * self.camSpeed
             self.cameraY = self.cameraY + mult[2] * dt * self.camSpeed
+
+            if mode == "move" and currentPlatform ~= nil then
+                currentPlatform.X = currentPlatform.X + mult[1] * dt * self.camSpeed
+                currentPlatform.Y = currentPlatform.Y + mult[2] * dt * self.camSpeed
+            end
         end
     end
+
+    
 end
 
 function editor:Draw()
@@ -304,16 +342,21 @@ function editor:Draw()
             love.graphics.setColor(p.R, p.G, p.B, 1)
             love.graphics.rectangle("fill", p.X - self.cameraX, p.Y - self.cameraY, p.W, p.H, 10, 10)
         else
-            love.graphics.setColor(1,1,1, 1)
+            love.graphics.setColor(1,1,1,1)
             love.graphics.draw(sprites.Lava, p.X - self.cameraX, p.Y - self.cameraY, 0, p.W/ 100, p.H / 100)
         end
         
     end
     if currentPlatform ~= nil then
-        love.graphics.setColor(currentPlatform.R, currentPlatform.G, currentPlatform.B, 0.5)
-        love.graphics.rectangle("fill", currentPlatform.X - self.cameraX, currentPlatform.Y - self.cameraY, currentPlatform.W, currentPlatform.H)
+        if currentPlatform.T == 1 then
+            love.graphics.setColor(currentPlatform.R, currentPlatform.G, currentPlatform.B, 0.5)
+            love.graphics.rectangle("fill", currentPlatform.X - self.cameraX, currentPlatform.Y - self.cameraY, currentPlatform.W, currentPlatform.H)
+        elseif currentPlatform.T == 2 then
+            love.graphics.setColor(1, 1, 1, 0.5)
+            love.graphics.draw(sprites.Lava, currentPlatform.X - self.cameraX, currentPlatform.Y - self.cameraY, 0, currentPlatform.W / 100, currentPlatform.H / 100)
+        end
     end
-
+    
     love.graphics.setColor(1,1,1, 0.5)
     love.graphics.draw(sprites.SpawnPoint, 200 - self.cameraX, 0 - self.cameraY)
     
