@@ -14,6 +14,11 @@ function love.load()
     
 
     --world:setCallbacks(beginContact, endContact)
+
+    editor:Load()
+    
+    
+
     player:Init(world)
     mapLoader:GooseToTable()
     mapLoader:Load(world)
