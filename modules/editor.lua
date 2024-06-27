@@ -2,10 +2,10 @@ local editor = {}
 
 local map = {}
 
-editor.enabled = false
+editor.enabled = true
 
 local camDirections = {
-    up = {0,-1}, down = {0,1}, left = {-1, 0}, right = {1,0}
+    w = {0,-1}, s = {0,1}, a = {-1, 0}, d = {1,0}
 }
 editor.cameraX = 0
 editor.cameraY = 0
@@ -19,6 +19,11 @@ local mode = "place"
 local platformType = 1
 
 local f
+
+local sliding = false
+local hue = 0.0
+local saturation = 1.0
+local brightness = 1.0
 
 local buttons = {
     {
@@ -60,10 +65,66 @@ local buttons = {
             return false
         end,
         Callback = function ()
-            f:open("w")
             
-            f:write(mapLoader:TableToGoose(map))
+            f:open("w")
+            local s, m = f:write(mapLoader:TableToGoose(map))
+            print(s, m)
             f:close()
+
+            love.window.showMessageBox("Editor", "Level saved!", "info", false)
+        end
+    }
+}
+
+local rgbaSliders = {
+    {
+        Sprite = "Hue",
+        Transform = {10, 56, 200, 25},
+        SliderPos = function ()
+            return (10 + (hue * 200))
+        end,
+        Callback = function (percentage)
+            hue = percentage
+            if hue > 1.0 then
+                hue = 1.0
+            end
+            if hue < 0.0 then
+                hue = 0.0
+            end
+        end
+    },
+    
+    {
+        Sprite = "Saturation",
+        Transform = {10, 83, 200, 25},
+        SliderPos = function ()
+            return (10 + (saturation * 200))
+        end,
+        Callback = function (percentage)
+            saturation = percentage
+            if saturation > 1.0 then
+                saturation = 1.0
+            end
+            if saturation < 0.0 then
+                saturation = 0.0
+            end
+        end
+    },
+
+    {
+        Sprite = "Brightness",
+        Transform = {10, 110, 200, 25},
+        SliderPos = function ()
+            return (10 + (brightness * 200))
+        end,
+        Callback = function (percentage)
+            brightness = percentage
+            if brightness > 1.0 then
+                brightness = 1.0
+            end
+            if brightness < 0.0 then
+                brightness = 0.0
+            end
         end
     }
 }
@@ -75,13 +136,44 @@ local sprites = {
     DeleteMode = "delete_mode.png",
     LavaMode = "lava_mode.png",
     Lava = "lava.png",
-    Save = "save.png"
+    Save = "save.png",
+    Hue = "hue.png",
+    Saturation = "saturation.png",
+    Brightness = "brightness.png",
+    Slider = "slider.png"
 }
+
+function HSVtoRGB(h, s, v)
+    if s <= 0 then return v,v,v end
+    h = h*6
+    local c = v*s
+    local x = (1-math.abs((h%2)-1))*c
+    local m,r,g,b = (v-c), 0, 0, 0
+    if h < 1 then
+        r, g, b = c, x, 0
+    elseif h < 2 then
+        r, g, b = x, c, 0
+    elseif h < 3 then
+        r, g, b = 0, c, x
+    elseif h < 4 then
+        r, g, b = 0, x, c
+    elseif h < 5 then
+        r, g, b = x, 0, c
+    else
+        r, g, b = c, 0, x
+    end
+    return r+m, g+m, b+m
+end
 
 function editor:Load()
     for name, sprite in pairs(sprites) do
         sprites[name] = love.graphics.newImage("/img/"..sprite)
     end
+
+    --[[f = love.filesystem.newFile("/maps/test.goose", "r")
+    local mapString = f:read("string")
+    map = mapLoader:GooseToTable(mapString)
+    f:close()]]
 end
 
 function love.mousepressed(x, y, button)
@@ -91,6 +183,16 @@ function love.mousepressed(x, y, button)
     for _, b in ipairs(buttons) do
         if collision:CheckCollision(x, y, 1, 1, b.Transform[1], b.Transform[2], b.Transform[3], b.Transform[4]) then
             b.Callback()
+
+            return
+        end
+    end
+
+    for _, s in ipairs(rgbaSliders) do
+        if collision:CheckCollision(x, y, 1, 1, s.Transform[1], s.Transform[2], s.Transform[3], s.Transform[4]) then
+            local sliderPercent = (x - s.Transform[1]) / s.Transform[3]
+            s.Callback(sliderPercent)
+            sliding = true
 
             return
         end
@@ -120,7 +222,20 @@ end
 
 function love.mousemoved(x, y)
     if editor.enabled == false then return end
+    
+    for _, s in ipairs(rgbaSliders) do
+        if collision:CheckCollision(x, y, 1, 1, s.Transform[1], s.Transform[2], s.Transform[3], s.Transform[4]) and sliding then
+            local sliderPercent = (x - s.Transform[1]) / s.Transform[3]
+            s.Callback(sliderPercent)
+            
+            return
+        end
+    end
+
     if currentPlatform == nil then return end
+
+    
+
     print(x, y)
     
     currentPlatform.W = x + editor.cameraX - currentPlatform.X 
@@ -131,6 +246,10 @@ function love.mousereleased(x, y, button)
     
     if editor.enabled == false then return end
     if button ~= 1 then return end
+
+    sliding = false
+    
+
     if currentPlatform == nil then return end
     print(x, y, button)
     
@@ -195,6 +314,15 @@ function editor:Draw()
         
         love.graphics.draw(sprites[b.Sprite], b.Transform[1], b.Transform[2])
     end
+
+    for _, s in ipairs(rgbaSliders) do
+        love.graphics.draw(sprites[s.Sprite], s.Transform[1], s.Transform[2], 0)
+        love.graphics.draw(sprites.Slider, s.SliderPos(), s.Transform[2], 0, 1, 1, 5)
+    end
+    
+    local r,g,b = HSVtoRGB(hue, saturation, brightness)
+    love.graphics.setColor(r,g,b,1)
+    love.graphics.rectangle("fill", 10, 200, 20, 20)
 end
 
 function love.filedropped(file)
@@ -202,6 +330,7 @@ function love.filedropped(file)
     f = file
     local mapString = file:read("string")
     map = mapLoader:GooseToTable(mapString)
+    print(f)
     f:close()
 end
 
