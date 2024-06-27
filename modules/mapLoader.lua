@@ -1,29 +1,39 @@
 local mapLoader = {}
 
 mapLoader.data = {
-    {
-        X = 0,
-        Y = 250,
-        W = 200,
-        H = 50
-    },
-    
-    {
-        X = 300,
-        Y = 200,
-        W = 50,
-        H = 500
-    },
-
-    {
-        X = 500,
-        Y = 300,
-        W = 50,
-        H = 500
-    }
 }
 
 mapLoader.map = {}
+
+local str = require("modules.str")
+
+function mapLoader:GooseToTable(gooseFile)
+    local contents = love.filesystem.read("/maps/test.goose")
+    
+    for _, platform in ipairs(str:split(contents, "|")) do
+        local p = {}
+        for _, property in ipairs(str:split(platform, ";")) do
+            local kp = str:split(property, ":")
+            print(kp[1], kp[2])
+            p[kp[1]] = tonumber(kp[2])
+        end
+        table.insert(self.data, p)
+    end
+end
+
+function mapLoader:TableToGoose(map)
+    local goose = ""
+
+    for _, platform in ipairs(map) do
+        for k, p in pairs(platform) do
+            goose = goose..k..":"..tostring(p)..";"
+        end
+
+        goose = goose.."|"
+    end
+
+    return goose
+end
 
 function mapLoader:Load(world)
     for _, platform in ipairs(self.data) do
