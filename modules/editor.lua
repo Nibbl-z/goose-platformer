@@ -2,7 +2,7 @@ local editor = {}
 
 local map = {}
 
-editor.enabled = true
+editor.enabled = false
 
 local camDirections = {
     w = {0,-1}, s = {0,1}, a = {-1, 0}, d = {1,0}
@@ -230,11 +230,11 @@ function editor:Load()
     for name, sprite in pairs(sprites) do
         sprites[name] = love.graphics.newImage("/img/"..sprite)
     end
-
-    --[[f = love.filesystem.newFile("/maps/test.goose", "r")
+    
+    f = love.filesystem.newFile("test.goose", "r")
     local mapString = f:read("string")
     map = mapLoader:GooseToTable(mapString)
-    f:close()]]
+    f:close()
 end
 
 function love.mousepressed(x, y, button)

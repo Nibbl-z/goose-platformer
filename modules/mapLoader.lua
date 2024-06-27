@@ -38,7 +38,9 @@ function mapLoader:TableToGoose(map)
 end
 
 function mapLoader:Load(world)
-    self.data = mapLoader:GooseToTable(love.filesystem.read("/maps/test.goose"))
+    love.filesystem.setIdentity("goose-platformer")
+    
+    self.data = mapLoader:GooseToTable(love.filesystem.read("test.goose"))
     
     for _, platform in ipairs(self.data) do
         local p = {}
@@ -53,7 +55,7 @@ function mapLoader:Load(world)
         end
         
         p.fixture:setRestitution(0)
-
+        
         table.insert(self.map, p)
     end
 end

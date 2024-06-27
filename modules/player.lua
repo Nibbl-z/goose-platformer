@@ -6,6 +6,7 @@ local camDirections = {
 }
 
 player.speed = 5000
+player.maxSpeed = 400
 player.direction = 1
 player.jumpHeight = 1500
 player.onGround = false
@@ -82,6 +83,9 @@ function player:Update(dt, map)
             self.body:applyLinearImpulse(impulseX, impulseY)
         end
     end
+
+    local velX, velY = self.body:getLinearVelocity()
+    self.body:setLinearVelocity(math.min(velX, self.maxSpeed), math.min(velY, self.maxSpeed))
     
     cX = lerp(cX, self.body:getX(), 0.05)
     cY = lerp(cY, self.body:getY(), 0.05)

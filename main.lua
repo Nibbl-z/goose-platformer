@@ -17,20 +17,27 @@ function love.load()
     
 
     world:setCallbacks(beginContact, endContact)
-
+    
     editor:Load()
     
-    
-
     player:Init(world)
     mapLoader:Load(world)
+end
+
+function love.keypressed(key, scancode, rep)
+    if rep then return end
+
+    if scancode == "p" then
+        editor.enabled = not editor.enabled
+        mapLoader:Load(world)
+    end
 end
 
 function love.update(dt)
     if editor.enabled == false then
         world:update(dt)
         player:Update(dt, mapLoader.data)
-
+        
         if respawnDelay then
             player:Respawn()
             respawnDelay = false
