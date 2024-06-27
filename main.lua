@@ -2,7 +2,7 @@ local sprites = {
     Player = "player.png"
 }
 
-local world = love.physics.newWorld(0, 5000, true)
+local world = love.physics.newWorld(0, 1000, true)
 local player = require("modules.player")
 local mapLoader = require("modules.mapLoader")
 
@@ -11,6 +11,8 @@ function love.load()
         sprites[name] = love.graphics.newImage("/img/"..sprite)
     end
     
+
+    --world:setCallbacks(beginContact, endContact)
     player:Init(world)
     mapLoader:Load(world)
 end
@@ -18,7 +20,7 @@ end
 function love.update(dt)
     world:update(dt)
     
-    player:Update(dt, mapLoader.map)
+    player:Update(dt, mapLoader.data)
 end
 
 function love.draw()
@@ -28,3 +30,17 @@ function love.draw()
         love.graphics.polygon("fill", p.body:getWorldPoints(p.shape:getPoints()))
     end
 end
+
+--[[function beginContact(a, b)
+    if a:getUserData() == "player" and b:getUserData() == "platform" then
+        print("yay")
+        player.onGround = true
+    end
+end
+
+function endContact(a, b)
+    if a:getUserData() == "player" and b:getUserData() == "platform" then
+        print("aw")
+        player.onGround = false
+    end
+end]]
