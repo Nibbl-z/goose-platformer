@@ -62,7 +62,7 @@ function love.mousepressed(x, y, button)
             return
         end
     end
-
+    
     if mode == "place" then
         print(x, y, button)
         currentPlatform = {}
@@ -72,8 +72,10 @@ function love.mousepressed(x, y, button)
         currentPlatform.H = 1
     elseif mode == "delete" then
         for i, v in ipairs(map) do
-            if collision:CheckCollision(x, y, 1, 1, v.X, v.Y, v.W, v.H) then
+            if collision:CheckCollision(x + editor.cameraX, y + editor.cameraY, 5, 5, v.X, v.Y, v.W, v.H) then
                 table.remove(map, i)
+                
+                break
             end
         end
     end
@@ -139,7 +141,7 @@ function editor:Draw()
         love.graphics.setColor(0, 1, 0, 0.5)
         love.graphics.rectangle("fill", currentPlatform.X - self.cameraX, currentPlatform.Y - self.cameraY, currentPlatform.W, currentPlatform.H)
     end
-
+    
     for _, b in ipairs(buttons) do
         if b.IsEnabled() then
             love.graphics.setColor(1,1,1,0.5) 
@@ -147,9 +149,14 @@ function editor:Draw()
             love.graphics.setColor(1,1,1,1)
         end
         
-        print(sprites[b.Sprite])
         love.graphics.draw(sprites[b.Sprite], b.Transform[1], b.Transform[2])
     end
+end
+
+function love.filedropped(file)
+    file:open("r")
+    local f = file:read("string")
+    map = mapLoader:GooseToTable(f)
 end
 
 return editor

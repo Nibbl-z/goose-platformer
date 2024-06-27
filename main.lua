@@ -20,7 +20,6 @@ function love.load()
     
 
     player:Init(world)
-    mapLoader:GooseToTable()
     mapLoader:Load(world)
 end
 

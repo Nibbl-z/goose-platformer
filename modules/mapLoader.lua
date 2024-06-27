@@ -8,8 +8,8 @@ mapLoader.map = {}
 local str = require("modules.str")
 
 function mapLoader:GooseToTable(gooseFile)
-    local contents = love.filesystem.read("/maps/test.goose")
-    
+    local contents = gooseFile
+    local data = {}
     for _, platform in ipairs(str:split(contents, "|")) do
         local p = {}
         for _, property in ipairs(str:split(platform, ";")) do
@@ -17,8 +17,10 @@ function mapLoader:GooseToTable(gooseFile)
             print(kp[1], kp[2])
             p[kp[1]] = tonumber(kp[2])
         end
-        table.insert(self.data, p)
+        table.insert(data, p)
     end
+
+    return data
 end
 
 function mapLoader:TableToGoose(map)
@@ -36,6 +38,8 @@ function mapLoader:TableToGoose(map)
 end
 
 function mapLoader:Load(world)
+    self.data = mapLoader:GooseToTable(love.filesystem.read("/maps/test.goose"))
+    
     for _, platform in ipairs(self.data) do
         local p = {}
         
