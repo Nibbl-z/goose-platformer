@@ -28,7 +28,7 @@ local function lerp(a, b, t)
 end
 
 function player:Init(world)
-    self.body = love.physics.newBody(world, 20, 0, "dynamic")
+    self.body = love.physics.newBody(world, 200, 0, "dynamic")
     self.body:setLinearDamping(1)
     self.shape = love.physics.newRectangleShape(50, 50)
     self.fixture = love.physics.newFixture(self.body, self.shape)
@@ -95,6 +95,11 @@ function player:Update(dt, map)
             self.cameraY = self.cameraY + mult[2] * dt * self.camSpeed
         end
     end]]
+end
+
+function player:Respawn()
+    self.body:setX(200)
+    self.body:setY(0)
 end
 
 return player

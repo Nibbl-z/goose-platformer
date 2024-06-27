@@ -1,5 +1,6 @@
 local sprites = {
-    Player = "player.png"
+    Player = "player.png",
+    Lava = "lava.png",
 }
 
 local world = love.physics.newWorld(0, 1000, true)
@@ -7,13 +8,15 @@ local player = require("modules.player")
 local mapLoader = require("modules.mapLoader")
 local editor = require("modules.editor")
 
+local respawnDelay = false
+
 function love.load()
     for name, sprite in pairs(sprites) do
         sprites[name] = love.graphics.newImage("/img/"..sprite)
     end
     
 
-    --world:setCallbacks(beginContact, endContact)
+    world:setCallbacks(beginContact, endContact)
 
     editor:Load()
     
@@ -27,9 +30,15 @@ function love.update(dt)
     if editor.enabled == false then
         world:update(dt)
         player:Update(dt, mapLoader.data)
+
+        if respawnDelay then
+            player:Respawn()
+            respawnDelay = false
+        end
     else
         editor:Update(dt)
     end
+    
 end
 
 function love.draw()
@@ -41,7 +50,13 @@ function love.draw()
         love.graphics.setColor(0,0,0,1)
         for _, p in ipairs(mapLoader.data) do
             
-            love.graphics.rectangle("fill", p.X - player.cameraX, p.Y - player.cameraY, p.W, p.H, 10, 10)
+            if p.T == 1 then
+                love.graphics.setColor(0, 0, 0, 1)
+                love.graphics.rectangle("fill", p.X - player.cameraX, p.Y - player.cameraY, p.W, p.H, 10, 10)
+            else
+                love.graphics.setColor(1,1,1, 1)
+                love.graphics.draw(sprites.Lava, p.X - player.cameraX, p.Y - player.cameraY, 0, p.W/ 100, p.H / 100)
+            end
         end
     end
 
@@ -50,16 +65,13 @@ function love.draw()
     end
 end
 
---[[function beginContact(a, b)
-    if a:getUserData() == "player" and b:getUserData() == "platform" then
-        print("yay")
-        player.onGround = true
+function beginContact(a, b)
+    if a:getUserData() == "player" and b:getUserData() == "lava" then
+        print("death")
+        respawnDelay = true
     end
 end
 
 function endContact(a, b)
-    if a:getUserData() == "player" and b:getUserData() == "platform" then
-        print("aw")
-        player.onGround = false
-    end
-end]]
+    
+end

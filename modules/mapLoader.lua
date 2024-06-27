@@ -46,7 +46,12 @@ function mapLoader:Load(world)
         p.body = love.physics.newBody(world, platform.X + (platform.W / 2), platform.Y + (platform.H / 2), "static")
         p.shape = love.physics.newRectangleShape(platform.W, platform.H)
         p.fixture = love.physics.newFixture(p.body, p.shape)
-        p.fixture:setUserData("platform")
+        if platform.T == 1 then
+            p.fixture:setUserData("platform")
+        elseif platform.T == 2 then
+            p.fixture:setUserData("lava")
+        end
+        
         p.fixture:setRestitution(0)
 
         table.insert(self.map, p)
