@@ -51,7 +51,7 @@ function love.draw()
         for _, p in ipairs(mapLoader.data) do
             
             if p.T == 1 then
-                love.graphics.setColor(0, 0, 0, 1)
+                love.graphics.setColor(p.R, p.G, p.B, 1)
                 love.graphics.rectangle("fill", p.X - player.cameraX, p.Y - player.cameraY, p.W, p.H, 10, 10)
             else
                 love.graphics.setColor(1,1,1, 1)

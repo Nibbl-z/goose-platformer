@@ -2,7 +2,7 @@ local editor = {}
 
 local map = {}
 
-editor.enabled = true
+editor.enabled = false
 
 local camDirections = {
     w = {0,-1}, s = {0,1}, a = {-1, 0}, d = {1,0}
@@ -206,6 +206,18 @@ function love.mousepressed(x, y, button)
         currentPlatform.W = 1
         currentPlatform.H = 1
         currentPlatform.T = platformType
+
+        if platformType == 1 then
+            local r,g,b = HSVtoRGB(hue, saturation, brightness)
+
+            currentPlatform.R = r
+            currentPlatform.G = g
+            currentPlatform.B = b
+        else
+            currentPlatform.R = 1 
+            currentPlatform.G = 1
+            currentPlatform.B = 1
+        end
     elseif mode == "delete" then
         for i, v in ipairs(map) do
             if collision:CheckCollision(x + editor.cameraX, y + editor.cameraY, 5, 5, v.X, v.Y, v.W, v.H) then
@@ -289,7 +301,7 @@ function editor:Draw()
     
     for _, p in ipairs(map) do
         if p.T == 1 then
-            love.graphics.setColor(0, 0, 0, 1)
+            love.graphics.setColor(p.R, p.G, p.B, 1)
             love.graphics.rectangle("fill", p.X - self.cameraX, p.Y - self.cameraY, p.W, p.H, 10, 10)
         else
             love.graphics.setColor(1,1,1, 1)
@@ -298,7 +310,7 @@ function editor:Draw()
         
     end
     if currentPlatform ~= nil then
-        love.graphics.setColor(0, 1, 0, 0.5)
+        love.graphics.setColor(currentPlatform.R, currentPlatform.G, currentPlatform.B, 0.5)
         love.graphics.rectangle("fill", currentPlatform.X - self.cameraX, currentPlatform.Y - self.cameraY, currentPlatform.W, currentPlatform.H)
     end
 
@@ -314,15 +326,33 @@ function editor:Draw()
         
         love.graphics.draw(sprites[b.Sprite], b.Transform[1], b.Transform[2])
     end
+    
+    if mode == "place" and platformType == 1 then
+        for _, s in ipairs(rgbaSliders) do
+            if s.Sprite == "Saturation" then
+                love.graphics.setColor(1,1,1,1)
+                love.graphics.rectangle("fill", s.Transform[1], s.Transform[2], s.Transform[3], s.Transform[4])
+    
+                local r,g,b = HSVtoRGB(hue, 1, brightness)
+                love.graphics.setColor(r,g,b,1)
+            elseif s.Sprite == "Brightness" then
+                local r,g,b = HSVtoRGB(hue, saturation, 1)
+                love.graphics.setColor(r,g,b,1)
+            end     
+    
+            love.graphics.draw(sprites[s.Sprite], s.Transform[1], s.Transform[2], 0)
+    
+            love.graphics.setColor(1,1,1,1)
+            love.graphics.draw(sprites.Slider, s.SliderPos(), s.Transform[2], 0, 1, 1, 5)
+        end
 
-    for _, s in ipairs(rgbaSliders) do
-        love.graphics.draw(sprites[s.Sprite], s.Transform[1], s.Transform[2], 0)
-        love.graphics.draw(sprites.Slider, s.SliderPos(), s.Transform[2], 0, 1, 1, 5)
+        local r,g,b = HSVtoRGB(hue, saturation, brightness)
+        love.graphics.setColor(r,g,b,1)
+        love.graphics.rectangle("fill", 10, 200, 20, 20)
     end
     
-    local r,g,b = HSVtoRGB(hue, saturation, brightness)
-    love.graphics.setColor(r,g,b,1)
-    love.graphics.rectangle("fill", 10, 200, 20, 20)
+    
+    
 end
 
 function love.filedropped(file)
