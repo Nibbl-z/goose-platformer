@@ -3,7 +3,8 @@ local menu = {}
 local sprites = {
     Logo = "logo.png",
     Play = "play.png",
-    Editor = "editor.png"
+    Editor = "editor.png",
+    NewLevel = "newlevel.png"
 }
 
 menu.enabled = true
@@ -13,11 +14,18 @@ local player = require("modules.player")
 local editor = require("modules.editor")
 local levelList = {}
 local levelButtons = {}
+
+local tab = ""
+
 local buttons = {
     {
         Sprite = "Play",
         Transform = {10, 110, 300, 225},
+        Visible = function ()
+            return true
+        end,
         Callback = function ()
+            tab = "play"
             love.filesystem.setIdentity("goose-platformer")
             
             levelList = {}
@@ -39,7 +47,8 @@ local buttons = {
                             menu.enabled = false
                         end
                     })
-
+                    
+                   
 
                     index = index + 1
                 end
@@ -50,7 +59,11 @@ local buttons = {
     {
         Sprite = "Editor",
         Transform = {10, 340, 300, 225},
+        Visible = function ()
+            return true
+        end,
         Callback = function ()
+            tab = "editor"
             love.filesystem.setIdentity("goose-platformer")
             
             levelList = {}
@@ -74,10 +87,25 @@ local buttons = {
                         end
                     })
 
-
+                    
                     index = index + 1
                 end
             end
+        end
+    },
+    
+    {
+        Sprite = "NewLevel",
+        Transform = {350, 560, 400, 50},
+        IsVisible = function ()
+            if tab == "editor" then return true else return false end
+        end,
+        Callback = function ()
+            love.filesystem.setIdentity("goose-platformer")
+            local newFile = love.filesystem.newFile("helpme.goose")
+            
+            newFile:open("w")
+            newFile:write("")
         end
     }
 }
