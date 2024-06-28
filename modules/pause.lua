@@ -4,6 +4,7 @@ pause.paused = false
 local collision = require("modules.collision")
 local menu = require("modules.menu")
 local mapLoader = require("modules.mapLoader")
+local editor = require("modules.editor")
 
 local buttons = {
     {
@@ -13,13 +14,14 @@ local buttons = {
             pause.paused = false
         end
     },
-
+    
     {
         Sprite = "Menu",
         Transform = {10, 220, 300, 150},
         Callback = function ()
             mapLoader:Unload()
             pause.paused = false
+            editor.enabled = false
             menu:Reset()
             menu.enabled = true
         end
@@ -39,7 +41,7 @@ function pause:Init()
 end
 
 function pause:mousepressed(x, y, button)
-    if self.enabled == false then return end
+    if self.paused == false then return end
     if button ~= 1 then return end
 
     for _, b in ipairs(buttons) do

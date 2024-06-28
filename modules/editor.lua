@@ -226,12 +226,14 @@ function RGBtoHSV(r,g,b)
 	return h, M == 0.0 and 0.0 or C / M, M
 end
 
-function editor:Load()
+function editor:Init()
     for name, sprite in pairs(sprites) do
         sprites[name] = love.graphics.newImage("/img/"..sprite)
     end
-    
-    f = love.filesystem.newFile("test.goose", "r")
+end
+
+function editor:Load(filename)
+    f = love.filesystem.newFile(filename, "r")
     local mapString = f:read("string")
     map = mapLoader:GooseToTable(mapString)
     f:close()

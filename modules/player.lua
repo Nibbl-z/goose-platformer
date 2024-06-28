@@ -100,7 +100,7 @@ function player:Update(dt, map)
         end
     end]]
     
-    if self.body:getY() < -100 then
+    if self.body:getY() > 1000 then
         self:Respawn()
     end
 end

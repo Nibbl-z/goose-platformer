@@ -20,7 +20,7 @@ function love.load()
     world:setCallbacks(beginContact, endContact)
     
     menu:Load()
-    --editor:Load()
+    editor:Init()
     
     player:Init(world)
     mapLoader:Init(world)

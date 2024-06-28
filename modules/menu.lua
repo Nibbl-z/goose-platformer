@@ -10,6 +10,7 @@ menu.enabled = true
 local collision = require("modules.collision")
 local mapLoader = require("modules.mapLoader")
 local player = require("modules.player")
+local editor = require("modules.editor")
 local levelList = {}
 local levelButtons = {}
 local buttons = {
@@ -50,7 +51,33 @@ local buttons = {
         Sprite = "Editor",
         Transform = {10, 340, 300, 225},
         Callback = function ()
-            print("gup")
+            love.filesystem.setIdentity("goose-platformer")
+            
+            levelList = {}
+            levelButtons = {}
+            
+            local index = 1
+
+            for _, v in ipairs(love.filesystem.getDirectoryItems("")) do
+                if v:match("^.+(%..+)$") == ".goose" then
+                    
+                    table.insert(levelList, v)
+                    
+                    table.insert(levelButtons, {
+                        Transform = {360, 120 + ((index - 1) * 55), 380, 50},
+                        Callback = function ()
+                            print(v)
+                            mapLoader:Load(v)
+                            editor:Load(v)
+                            editor.enabled = true
+                            menu.enabled = false
+                        end
+                    })
+
+
+                    index = index + 1
+                end
+            end
         end
     }
 }
