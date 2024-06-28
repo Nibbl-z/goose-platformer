@@ -6,6 +6,7 @@ mapLoader.data = {
 mapLoader.map = {}
 
 local str = require("modules.str")
+local world
 
 function mapLoader:GooseToTable(gooseFile)
     local contents = gooseFile
@@ -37,10 +38,14 @@ function mapLoader:TableToGoose(map)
     return goose
 end
 
-function mapLoader:Load(world)
+function mapLoader:Init(w)
+    world = w
+end
+
+function mapLoader:Load(filename)
     love.filesystem.setIdentity("goose-platformer")
     
-    self.data = mapLoader:GooseToTable(love.filesystem.read("test.goose"))
+    self.data = mapLoader:GooseToTable(love.filesystem.read(filename))
     
     for _, platform in ipairs(self.data) do
         local p = {}

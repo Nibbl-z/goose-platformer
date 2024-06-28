@@ -15,13 +15,14 @@ function love.load()
     for name, sprite in pairs(sprites) do
         sprites[name] = love.graphics.newImage("/img/"..sprite)
     end
-
+    
     world:setCallbacks(beginContact, endContact)
     
     menu:Load()
     --editor:Load()
     
-      player:Init(world)
+    player:Init(world)
+    mapLoader:Init(world)
     --mapLoader:Load(world)
 end
 
@@ -32,6 +33,11 @@ function love.keypressed(key, scancode, rep)
         editor.enabled = not editor.enabled
         mapLoader:Load(world)
     end
+end
+
+function love.mousepressed(x, y, button)
+    menu:mousepressed(x, y, button)
+    editor:mousepressed(x, y, button)
 end
 
 function love.update(dt)

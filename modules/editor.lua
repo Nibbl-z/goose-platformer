@@ -237,8 +237,8 @@ function editor:Load()
     f:close()
 end
 
-function love.mousepressed(x, y, button)
-    if editor.enabled == false then return end
+function editor:mousepressed(x, y, button)
+    if self.enabled == false then return end
     if button ~= 1 then return end
     
     for _, b in ipairs(buttons) do
