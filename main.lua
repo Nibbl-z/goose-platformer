@@ -7,6 +7,7 @@ local world = love.physics.newWorld(0, 1000, true)
 local player = require("modules.player")
 local mapLoader = require("modules.mapLoader")
 local editor = require("modules.editor")
+local menu = require("modules.menu")
 
 local respawnDelay = false
 
@@ -14,14 +15,14 @@ function love.load()
     for name, sprite in pairs(sprites) do
         sprites[name] = love.graphics.newImage("/img/"..sprite)
     end
-    
 
     world:setCallbacks(beginContact, endContact)
     
-    editor:Load()
+    menu:Load()
+    --editor:Load()
     
-    player:Init(world)
-    mapLoader:Load(world)
+      player:Init(world)
+    --mapLoader:Load(world)
 end
 
 function love.keypressed(key, scancode, rep)
@@ -49,7 +50,11 @@ function love.update(dt)
 end
 
 function love.draw()
-    if editor.enabled == false then
+    if menu.enabled then
+        menu:Draw()
+    end
+    
+    if editor.enabled == false and menu.enabled == false then
         love.graphics.setBackgroundColor(1,1,1,1)
         love.graphics.setColor(1,1,1,1)
         love.graphics.draw(sprites.Player, player.body:getX() - player.cameraX, player.body:getY() - player.cameraY, 0, player.direction, 1, 25, 25)

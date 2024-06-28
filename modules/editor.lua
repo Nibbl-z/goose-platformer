@@ -361,7 +361,8 @@ function love.mousereleased(x, y, button)
     print(x, y, button)
     
     if mode == "place" or mode == "scale" then
-        if currentPlatform .W < 0 then
+        
+        if currentPlatform.W < 0 then
             currentPlatform.W = -(x + editor.cameraX - currentPlatform.X)
             currentPlatform.X = currentPlatform.X - currentPlatform.W
         else
