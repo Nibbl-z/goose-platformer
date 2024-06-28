@@ -28,6 +28,8 @@ local hue = 0.0
 local saturation = 1.0
 local brightness = 1.0
 
+local movingMouse = false
+
 editor.placeDelay = 0
 
 local buttons = {
@@ -192,6 +194,15 @@ local sprites = {
     Slider = "slider.png"
 }
 
+local sounds = {
+    Select = {"select.wav", "static"},
+    Placing = {"placing.wav", "static"},
+    FinishPlace = {"finishPlace.wav", "static"},
+    Delete = {"delete.wav", "static"},
+    Paint = {"paint.wav", "static"},
+    ColorPick = {"colorpick.wav", "static"}
+}
+
 function HSVtoRGB(h, s, v)
     if s <= 0 then return v,v,v end
     h = h*6
@@ -232,6 +243,9 @@ function editor:Init()
     for name, sprite in pairs(sprites) do
         sprites[name] = love.graphics.newImage("/img/"..sprite)
     end
+    for name, sound in pairs(sounds) do
+        sounds[name] = love.audio.newSource("/audio/"..sound[1], sound[2])
+    end
 end
 
 function editor:Load(filename)
@@ -254,7 +268,7 @@ function editor:mousepressed(x, y, button)
     for _, b in ipairs(buttons) do
         if collision:CheckCollision(x, y, 1, 1, b.Transform[1], b.Transform[2], b.Transform[3], b.Transform[4]) then
             b.Callback()
-
+            sounds.Select:play()
             return
         end
     end
@@ -269,7 +283,15 @@ function editor:mousepressed(x, y, button)
         end
     end
     
+
+    if mode == "place" or mode == "scale" or mode == "move" then
+        sounds.Placing:setLooping(true)
+        sounds.Placing:play()
+    end
+
     if mode == "place" then
+        
+
         print(x, y, button)
         currentPlatform = {}
         currentPlatform.X = x + editor.cameraX
@@ -293,7 +315,7 @@ function editor:mousepressed(x, y, button)
         for i, v in ipairs(map) do
             if collision:CheckCollision(x + editor.cameraX, y + editor.cameraY, 5, 5, v.X, v.Y, v.W, v.H) then
                 table.remove(map, i)
-                
+                sounds.Delete:play()
                 break
             end
         end
@@ -301,11 +323,11 @@ function editor:mousepressed(x, y, button)
         for i, v in ipairs(map) do
             if collision:CheckCollision(x + editor.cameraX, y + editor.cameraY, 5, 5, v.X, v.Y, v.W, v.H) then
                 local r, g, b = HSVtoRGB(hue, saturation, brightness)
-
+                
                 v.R = r
                 v.G = g
                 v.B = b
-
+                sounds.Paint:play()
                 break
             end
         end
@@ -326,6 +348,8 @@ function editor:mousepressed(x, y, button)
                 saturation = s
                 brightness = v
 
+                sounds.ColorPick:play()
+
                 break
             end
         end
@@ -336,6 +360,8 @@ function love.mousemoved(x, y, dx, dy)
     if editor.placeDelay > love.timer.getTime() then return end
     if editor.enabled == false then return end
     
+    movingMouse = true
+
     for _, s in ipairs(rgbaSliders) do
         if collision:CheckCollision(x, y, 1, 1, s.Transform[1], s.Transform[2], s.Transform[3], s.Transform[4]) and sliding then
             local sliderPercent = (x - s.Transform[1]) / s.Transform[3]
@@ -346,6 +372,12 @@ function love.mousemoved(x, y, dx, dy)
     end
 
     if currentPlatform == nil then return end
+    
+    if mode == "place" or mode == "move" or mode == "scale" then
+        if sounds.Placing:isPlaying() == false then
+            sounds.Placing:play()
+        end
+    end
 
     if mode == "move" then
         currentPlatform.X = currentPlatform.X + dx + dcX
@@ -364,13 +396,14 @@ function love.mousereleased(x, y, button)
     if editor.placeDelay > love.timer.getTime() then return end
     if editor.enabled == false then return end
     if button ~= 1 then return end
-
+    
     sliding = false
     
     
     if currentPlatform == nil then return end
     print(x, y, button)
-    
+    sounds.Placing:stop()
+    sounds.FinishPlace:play()
     if mode == "place" or mode == "scale" then
         
         if currentPlatform.W < 0 then
@@ -396,6 +429,7 @@ function love.mousereleased(x, y, button)
 end
 
 function editor:Update(dt)  
+   
     dcX = 0
     dcY = 0
 
@@ -410,8 +444,12 @@ function editor:Update(dt)
             end
         end
     end
-
     
+    if not movingMouse then
+        sounds.Placing:stop()
+    end
+    
+    movingMouse = false
 end
 
 function editor:Draw()

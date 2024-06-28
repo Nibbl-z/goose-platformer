@@ -39,6 +39,10 @@ end
 
 function player:Update(dt, map)
     -- Movement
+    
+    if love.keyboard.isDown("r") then
+        self:Respawn()
+    end
     if not love.keyboard.isDown("space") then
         jumped = false
     end
@@ -88,7 +92,7 @@ function player:Update(dt, map)
 
     if velX > self.maxSpeed then velX = self.maxSpeed 
     elseif velX < -self.maxSpeed then velX = -self.maxSpeed end
-
+    
     self.body:setLinearVelocity(velX, velY)
     
     cX = lerp(cX, self.body:getX(), 0.1)
@@ -110,6 +114,8 @@ function player:Update(dt, map)
 end
 
 function player:Respawn()
+    self.body:setLinearVelocity(0,0)
+
     self.body:setX(200)
     self.body:setY(0)
 end

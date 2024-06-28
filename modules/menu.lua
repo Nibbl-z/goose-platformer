@@ -10,6 +10,10 @@ local sprites = {
     Right = "right.png"
 }
 
+local sounds = {
+    Select = {"select.wav", "static"}
+}
+
 menu.enabled = true
 menu.settingLevelName = false
 
@@ -34,7 +38,7 @@ local buttons = {
         Transform = {60, 370, 300, 225},
         Callback = function ()
             love.filesystem.setIdentity("goose-platformer")
-            
+            sounds.Select:play()
             mapLoader:Load(levelList[currentLevel])
             player:Respawn()
             menu.enabled = false
@@ -46,6 +50,7 @@ local buttons = {
         Transform = {love.graphics.getWidth() - 360, 370, 300, 225},
         Callback = function ()
             tab = "editor"
+            sounds.Select:play()
             love.filesystem.setIdentity("goose-platformer")
             
             --mapLoader:Load(levelList[currentLevel])
@@ -59,6 +64,7 @@ local buttons = {
         Sprite = "NewLevel",
         Transform = {70, 250, 50, 50},
         Callback = function ()
+            sounds.Select:play()
             menu.settingLevelName = true
         end
     },
@@ -95,6 +101,7 @@ local buttons = {
         Sprite = "Left",
         Transform = {5, 110, 50, 200},
         Callback = function ()
+            sounds.Select:play()
             currentLevel = currentLevel - 1
 
             if currentLevel <= 0 then
@@ -107,6 +114,7 @@ local buttons = {
         Sprite = "Right",
         Transform = {love.graphics.getWidth() - 55, 110, 50, 200},
         Callback = function ()
+            sounds.Select:play()
             currentLevel = currentLevel + 1
 
             if currentLevel > #levelList then
@@ -153,6 +161,10 @@ end
 function menu:Load()
     for name, sprite in pairs(sprites) do
         sprites[name] = love.graphics.newImage("/img/"..sprite)
+    end
+
+    for name, sound in pairs(sounds) do
+        sounds[name] = love.audio.newSource("/audio/"..sound[1], sound[2])
     end
 
     font = love.graphics.newFont(50)
