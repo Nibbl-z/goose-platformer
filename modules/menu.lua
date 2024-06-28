@@ -140,13 +140,14 @@ function menu:DrawLevelList()
     love.graphics.setFont(font)
 
     if self.settingLevelName then
-        love.graphics.print(name.."|", 70, 120)
+        love.graphics.printf(name.."|", 70, 120, love.graphics.getWidth() - 120)
     else
         if #levelList > 0 then
             love.graphics.printf(string.sub(levelList[currentLevel], 1, -7), 70, 120, love.graphics.getWidth() - 120)
         end
-        
     end
+    
+    love.graphics.printf(tostring(currentLevel).."/"..tostring(#levelList), love.graphics.getWidth() - 370, 250, 300, "right")
 end
 
 function menu:Load()
@@ -194,10 +195,18 @@ function menu:HandleTypingKey(key, scancode, rep)
         newFile:open("w")
         newFile:write("")
 
-        name = ""
+       
 
         self.settingLevelName = false
         self:RefreshLevels()
+
+        for i, v in ipairs(levelList) do
+            if v == name..".goose" then
+                currentLevel = i
+            end
+        end
+
+        name = ""
     end
 end
 

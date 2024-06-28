@@ -7,8 +7,8 @@ editor.enabled = false
 local camDirections = {
     w = {0,-1}, s = {0,1}, a = {-1, 0}, d = {1,0}
 }
-editor.cameraX = 0
-editor.cameraY = 0
+editor.cameraX = -100
+editor.cameraY = -400
 editor.camSpeed = 500
 
 local dcX = 0
@@ -27,6 +27,8 @@ local sliding = false
 local hue = 0.0
 local saturation = 1.0
 local brightness = 1.0
+
+editor.placeDelay = 0
 
 local buttons = {
     {
@@ -233,6 +235,10 @@ function editor:Init()
 end
 
 function editor:Load(filename)
+    self.placeDelay = love.timer.getTime() + 0.5
+    self.cameraX = -100
+    self.cameraY = -400
+    currentPlatform = nil
     f = love.filesystem.newFile(filename, "r")
     local mapString = f:read("string")
     map = mapLoader:GooseToTable(mapString)
@@ -240,6 +246,8 @@ function editor:Load(filename)
 end
 
 function editor:mousepressed(x, y, button)
+    if self.placeDelay > love.timer.getTime() then return end
+
     if self.enabled == false then return end
     if button ~= 1 then return end
     
@@ -325,6 +333,7 @@ function editor:mousepressed(x, y, button)
 end
 
 function love.mousemoved(x, y, dx, dy)
+    if editor.placeDelay > love.timer.getTime() then return end
     if editor.enabled == false then return end
     
     for _, s in ipairs(rgbaSliders) do
@@ -352,7 +361,7 @@ function love.mousemoved(x, y, dx, dy)
 end
 
 function love.mousereleased(x, y, button)
-    
+    if editor.placeDelay > love.timer.getTime() then return end
     if editor.enabled == false then return end
     if button ~= 1 then return end
 
