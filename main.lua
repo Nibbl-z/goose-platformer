@@ -8,6 +8,7 @@ local player = require("modules.player")
 local mapLoader = require("modules.mapLoader")
 local editor = require("modules.editor")
 local menu = require("modules.menu")
+local pause = require("modules.pause")
 
 local respawnDelay = false
 
@@ -23,6 +24,7 @@ function love.load()
     
     player:Init(world)
     mapLoader:Init(world)
+    pause:Init()
     --mapLoader:Load(world)
 end
 
@@ -33,15 +35,22 @@ function love.keypressed(key, scancode, rep)
         editor.enabled = not editor.enabled
         mapLoader:Load(world)
     end
+
+    if scancode == "escape" then
+        if menu.enabled == false then
+            pause.paused = not pause.paused
+        end
+    end
 end
 
 function love.mousepressed(x, y, button)
     menu:mousepressed(x, y, button)
     editor:mousepressed(x, y, button)
+    pause:mousepressed(x, y, button)
 end
 
 function love.update(dt)
-    if editor.enabled == false then
+    if editor.enabled == false and menu.enabled == false and pause.paused == false then
         world:update(dt)
         player:Update(dt, mapLoader.data)
         
@@ -80,6 +89,10 @@ function love.draw()
 
     if editor.enabled == true then
         editor:Draw()
+    end
+    
+    if pause.paused == true then
+        pause:Draw()
     end
 end
 

@@ -65,4 +65,15 @@ function mapLoader:Load(filename)
     end
 end
 
+
+function mapLoader:Unload()
+    for _, v in ipairs(self.map) do
+        if v.body:isDestroyed() == false then
+            v.body:destroy()
+        end
+        
+        v = nil
+    end
+end
+
 return mapLoader

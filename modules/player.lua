@@ -99,6 +99,10 @@ function player:Update(dt, map)
             self.cameraY = self.cameraY + mult[2] * dt * self.camSpeed
         end
     end]]
+    
+    if self.body:getY() < -100 then
+        self:Respawn()
+    end
 end
 
 function player:Respawn()

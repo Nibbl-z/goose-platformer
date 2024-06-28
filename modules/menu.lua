@@ -78,6 +78,11 @@ function menu:Load()
     font = love.graphics.newFont(40)
 end
 
+function menu:Reset()
+    levelList = {}
+    levelButtons = {}
+end
+
 function menu:mousepressed(x, y, button)
     if menu.enabled == false then return end
     if button ~= 1 then return end
