@@ -6,6 +6,8 @@ local menu = require("modules.menu")
 local mapLoader = require("modules.mapLoader")
 local editor = require("modules.editor")
 
+
+
 local buttons = {
     {
         Sprite = "Resume",
@@ -35,9 +37,18 @@ local sprites = {
     Menu = "menu.png"
 }
 
+local sounds = {
+    Select = {"select.wav", "static"}
+}
+
+
 function pause:Init()
     for name, sprite in pairs(sprites) do
         sprites[name] = love.graphics.newImage("/img/"..sprite)
+    end
+
+    for name, sound in pairs(sounds) do
+        sounds[name] = love.audio.newSource("/audio/"..sound[1], sound[2])
     end
 end
 
@@ -47,6 +58,7 @@ function pause:mousepressed(x, y, button)
 
     for _, b in ipairs(buttons) do
         if collision:CheckCollision(x, y, 1, 1, b.Transform[1], b.Transform[2], b.Transform[3], b.Transform[4]) then
+            sounds.Select:play()
             b.Callback()
 
             

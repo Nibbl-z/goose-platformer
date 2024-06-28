@@ -5,6 +5,10 @@ local camDirections = {
     up = {0,-1}, down = {0,1}, left = {-1, 0}, right = {1,0}
 }
 
+local sounds = {
+    Jump = {"jump.wav", "static"}
+}
+
 player.speed = 5000
 player.maxSpeed = 400
 player.direction = 1
@@ -35,6 +39,10 @@ function player:Init(world)
     self.fixture = love.physics.newFixture(self.body, self.shape)
     self.fixture:setUserData("player")
     self.fixture:setRestitution(0)
+
+    for name, sound in pairs(sounds) do
+        sounds[name] = love.audio.newSource("/audio/"..sound[1], sound[2])
+    end
 end
 
 function player:Update(dt, map)
@@ -69,7 +77,7 @@ function player:Update(dt, map)
             local impulseY = 0
             
             if key == "space" and self.onGround and not jumped then
-                print("jump")
+                sounds.Jump:play()
 
                 impulseY = self.jumpHeight * mult[2]
 
