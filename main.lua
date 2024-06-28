@@ -61,6 +61,7 @@ function love.update(dt)
         
         if respawnDelay then
             player:Respawn()
+            player:Death()
             respawnDelay = false
         end
     else

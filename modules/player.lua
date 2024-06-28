@@ -6,7 +6,8 @@ local camDirections = {
 }
 
 local sounds = {
-    Jump = {"jump.wav", "static"}
+    Jump = {"jump.wav", "static"},
+    Death = {"death.wav", "static"}
 }
 
 player.speed = 5000
@@ -119,6 +120,10 @@ function player:Update(dt, map)
     if self.body:getY() > 1000 then
         self:Respawn()
     end
+end
+
+function player:Death()
+    sounds.Death:play()
 end
 
 function player:Respawn()
