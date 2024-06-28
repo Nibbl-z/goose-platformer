@@ -4,10 +4,17 @@ local sprites = {
     Logo = "logo.png",
     Play = "play.png",
     Editor = "editor.png",
-    NewLevel = "newlevel.png"
+    NewLevel = "newlevel.png",
+    DeleteLevel = "deletelevel.png",
+    Left = "left.png",
+    Right = "right.png"
 }
 
 menu.enabled = true
+menu.settingLevelName = false
+
+local name = ""
+
 local collision = require("modules.collision")
 local mapLoader = require("modules.mapLoader")
 local player = require("modules.player")
@@ -15,97 +22,96 @@ local editor = require("modules.editor")
 local levelList = {}
 local levelButtons = {}
 
+local utf8 = require("utf8")
+
 local tab = ""
+
+local currentLevel = 1
 
 local buttons = {
     {
         Sprite = "Play",
-        Transform = {10, 110, 300, 225},
-        Visible = function ()
-            return true
-        end,
+        Transform = {60, 370, 300, 225},
         Callback = function ()
-            tab = "play"
             love.filesystem.setIdentity("goose-platformer")
             
-            levelList = {}
-            levelButtons = {}
-            
-            local index = 1
-
-            for _, v in ipairs(love.filesystem.getDirectoryItems("")) do
-                if v:match("^.+(%..+)$") == ".goose" then
-                    
-                    table.insert(levelList, v)
-                    
-                    table.insert(levelButtons, {
-                        Transform = {360, 120 + ((index - 1) * 55), 380, 50},
-                        Callback = function ()
-                            print(v)
-                            mapLoader:Load(v)
-                            player:Respawn()
-                            menu.enabled = false
-                        end
-                    })
-                    
-                   
-
-                    index = index + 1
-                end
-            end
+            mapLoader:Load(levelList[currentLevel])
+            player:Respawn()
+            menu.enabled = false
         end
     },
     
     {
         Sprite = "Editor",
-        Transform = {10, 340, 300, 225},
-        Visible = function ()
-            return true
-        end,
+        Transform = {love.graphics.getWidth() - 360, 370, 300, 225},
         Callback = function ()
             tab = "editor"
             love.filesystem.setIdentity("goose-platformer")
             
-            levelList = {}
-            levelButtons = {}
-            
-            local index = 1
-
-            for _, v in ipairs(love.filesystem.getDirectoryItems("")) do
-                if v:match("^.+(%..+)$") == ".goose" then
-                    
-                    table.insert(levelList, v)
-                    
-                    table.insert(levelButtons, {
-                        Transform = {360, 120 + ((index - 1) * 55), 380, 50},
-                        Callback = function ()
-                            print(v)
-                            mapLoader:Load(v)
-                            editor:Load(v)
-                            editor.enabled = true
-                            menu.enabled = false
-                        end
-                    })
-
-                    
-                    index = index + 1
-                end
-            end
+            --mapLoader:Load(levelList[currentLevel])
+            editor.enabled = true
+            editor:Load(levelList[currentLevel])
+            menu.enabled = false
         end
     },
     
     {
         Sprite = "NewLevel",
-        Transform = {350, 560, 400, 50},
-        IsVisible = function ()
-            if tab == "editor" then return true else return false end
-        end,
+        Transform = {70, 250, 50, 50},
         Callback = function ()
-            love.filesystem.setIdentity("goose-platformer")
-            local newFile = love.filesystem.newFile("helpme.goose")
+            menu.settingLevelName = true
+        end
+    },
+    
+    {
+        Sprite = "DeleteLevel",
+        Transform = {130, 250, 50, 50},
+        Callback = function ()
+            local result = love.window.showMessageBox(
+                "Confirm Delete", 
+                "Are you sure you want to delete "..string.sub(levelList[currentLevel], 1, -7).."?",
+                {"Cancel", "Delete"},
+                "info",
+                true
+            )
             
-            newFile:open("w")
-            newFile:write("")
+            if result == 2 then
+                love.filesystem.remove(levelList[currentLevel])
+
+                for i, v in ipairs(levelList) do
+                    if v == levelList[currentLevel] then 
+                        table.remove(levelList, i)
+                    end
+                end
+
+                if currentLevel > #levelList then
+                    currentLevel = 1
+                end
+            end
+        end
+    },
+
+    {
+        Sprite = "Left",
+        Transform = {5, 110, 50, 200},
+        Callback = function ()
+            currentLevel = currentLevel - 1
+
+            if currentLevel <= 0 then
+                currentLevel = #levelList
+            end
+        end
+    },
+
+    {
+        Sprite = "Right",
+        Transform = {love.graphics.getWidth() - 55, 110, 50, 200},
+        Callback = function ()
+            currentLevel = currentLevel + 1
+
+            if currentLevel > #levelList then
+                currentLevel = 1
+            end
         end
     }
 }
@@ -114,14 +120,32 @@ local buttons = {
 
 local font
 
+function menu:RefreshLevels()
+    love.filesystem.setIdentity("goose-platformer")
+            
+    levelList = {}
+
+    for _, v in ipairs(love.filesystem.getDirectoryItems("")) do
+        if v:match("^.+(%..+)$") == ".goose" then
+            table.insert(levelList, v)
+        end
+    end
+end
+
 function menu:DrawLevelList()
     love.graphics.setColor(0,0,0,1)
-    love.graphics.rectangle("line", 350, 110, 400, 450)
+    love.graphics.rectangle("line", 60, 110, love.graphics.getWidth() - 120, 200)
     
-    for i, v in ipairs(levelList) do
-        love.graphics.setFont(font)
-        love.graphics.rectangle("line", 360, 120 + ((i - 1) * 55), 380, 50)
-        love.graphics.print(v, 360, 120 + ((i - 1) * 55))
+    
+    love.graphics.setFont(font)
+
+    if self.settingLevelName then
+        love.graphics.print(name.."|", 70, 120)
+    else
+        if #levelList > 0 then
+            love.graphics.printf(string.sub(levelList[currentLevel], 1, -7), 70, 120, love.graphics.getWidth() - 120)
+        end
+        
     end
 end
 
@@ -130,12 +154,51 @@ function menu:Load()
         sprites[name] = love.graphics.newImage("/img/"..sprite)
     end
 
-    font = love.graphics.newFont(40)
+    font = love.graphics.newFont(50)
+    
+    self:RefreshLevels()
 end
 
 function menu:Reset()
     levelList = {}
     levelButtons = {}
+end
+
+local rejectedCharacters = {
+    "\\", "/", ":", "*", "?", "\"", "<", ">", "|"
+}
+
+function menu:HandleTypingName(t)
+    for _, v in pairs(rejectedCharacters) do
+        if v == t then
+            return
+        end
+    end
+
+    name = name..t
+end
+
+function menu:HandleTypingKey(key, scancode, rep)
+    if scancode == "backspace" then
+        local byteoffset = utf8.offset(name, -1)
+        
+        if byteoffset then
+            name = string.sub(name, 1, byteoffset - 1)
+        end
+    end
+    
+    if scancode == "return" then
+        love.filesystem.setIdentity("goose-platformer")
+        local newFile = love.filesystem.newFile(name..".goose")
+            
+        newFile:open("w")
+        newFile:write("")
+
+        name = ""
+
+        self.settingLevelName = false
+        self:RefreshLevels()
+    end
 end
 
 function menu:mousepressed(x, y, button)

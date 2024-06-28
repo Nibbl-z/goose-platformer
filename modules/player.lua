@@ -85,11 +85,15 @@ function player:Update(dt, map)
     end
 
     local velX, velY = self.body:getLinearVelocity()
-    self.body:setLinearVelocity(math.min(velX, self.maxSpeed), math.min(velY, self.maxSpeed))
-    
-    cX = lerp(cX, self.body:getX(), 0.05)
-    cY = lerp(cY, self.body:getY(), 0.05)
 
+    if velX > self.maxSpeed then velX = self.maxSpeed 
+    elseif velX < -self.maxSpeed then velX = -self.maxSpeed end
+
+    self.body:setLinearVelocity(velX, velY)
+    
+    cX = lerp(cX, self.body:getX(), 0.1)
+    cY = lerp(cY, self.body:getY(), 0.1)
+    
     self.cameraX = cX - self.camOffsetX
     self.cameraY = cY - self.camOffsetY
     

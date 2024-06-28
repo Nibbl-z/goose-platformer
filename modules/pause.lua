@@ -23,6 +23,7 @@ local buttons = {
             pause.paused = false
             editor.enabled = false
             menu:Reset()
+            menu:RefreshLevels()
             menu.enabled = true
         end
     }

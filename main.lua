@@ -28,13 +28,18 @@ function love.load()
     --mapLoader:Load(world)
 end
 
-function love.keypressed(key, scancode, rep)
-    if rep then return end
-
-    if scancode == "p" then
-        editor.enabled = not editor.enabled
-        mapLoader:Load(world)
+function love.textinput(t)
+    if menu.settingLevelName then
+        menu:HandleTypingName(t)
     end
+end
+
+function love.keypressed(key, scancode, rep)
+    if menu.settingLevelName then
+        menu:HandleTypingKey(key, scancode, rep)
+    end
+    
+    if rep then return end
 
     if scancode == "escape" then
         if menu.enabled == false then
