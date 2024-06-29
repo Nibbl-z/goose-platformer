@@ -307,12 +307,6 @@ function editor:mousepressed(x, y, button)
         end
     end
     
-
-    if mode == "place" or mode == "scale" or mode == "move" then
-        sounds.Placing:setLooping(true)
-        sounds.Placing:play()
-    end
-    
     if mode == "place" then
         
 
@@ -414,12 +408,6 @@ function love.mousemoved(x, y, dx, dy)
     end
 
     if currentPlatform == nil then return end
-    
-    if mode == "place" or mode == "move" or mode == "scale" then
-        if sounds.Placing:isPlaying() == false then
-            sounds.Placing:play()
-        end
-    end
 
     if mode == "move" then
         currentPlatform.X = currentPlatform.X + dx + dcX
