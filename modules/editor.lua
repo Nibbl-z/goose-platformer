@@ -474,6 +474,12 @@ function editor:Update(dt)
    
     dcX = 0
     dcY = 0
+    
+    if love.keyboard.isDown("lshift") then
+        self.camSpeed = 1250
+    else
+        self.camSpeed = 500
+    end
 
     for key, mult in pairs(camDirections) do
         if love.keyboard.isDown(key) then

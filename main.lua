@@ -29,6 +29,9 @@ function love.load()
     mapLoader:Init(world)
     pause:Init()
     win:Init()
+
+    love.window.setTitle("Goose Platformer")
+    love.window.setIcon(love.image.newImageData("/img/player.png"))
     --mapLoader:Load(world)
 end
 
