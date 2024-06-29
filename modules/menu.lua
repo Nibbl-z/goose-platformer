@@ -40,6 +40,7 @@ local buttons = {
             love.filesystem.setIdentity("goose-platformer")
             sounds.Select:play()
             mapLoader:Load(levelList[currentLevel])
+            player:ResetCheckpoint()
             player:Respawn()
             menu.enabled = false
         end

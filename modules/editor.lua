@@ -214,7 +214,8 @@ local sprites = {
     Saturation = "saturation.png",
     Brightness = "brightness.png",
     Slider = "slider.png",
-    Checkpoint = "checkpoint.png"
+    Checkpoint = "checkpoint.png",
+    Finish = "finish.png",
 }
 
 local sounds = {
@@ -376,13 +377,20 @@ function editor:mousepressed(x, y, button)
                 break
             end
         end
-    elseif mode == "checkpoint" then
+    elseif mode == "checkpoint" or mode == "finish" then
         currentPlatform = {}
         currentPlatform.X = x + editor.cameraX
         currentPlatform.Y = y + editor.cameraY
-        currentPlatform.W = 50
-        currentPlatform.H = 25
-        currentPlatform.T = 3
+        
+        if mode == "checkpoint" then 
+            currentPlatform.T = 3
+            currentPlatform.W = 25
+            currentPlatform.H = 50
+        elseif mode == "finish" then 
+            currentPlatform.T = 4
+            currentPlatform.W = 50
+            currentPlatform.H = 100
+        end
 
         table.insert(map, currentPlatform)
 
@@ -499,6 +507,9 @@ function editor:Draw()
         elseif p.T == 3 then
             love.graphics.setColor(1,1,1,1)
             love.graphics.draw(sprites.Checkpoint, p.X - self.cameraX, p.Y - self.cameraY, 0, 1, 1, 12.5, 25)
+        elseif p.T == 4 then
+            love.graphics.setColor(1,1,1,1)
+            love.graphics.draw(sprites.Finish, p.X - self.cameraX, p.Y - self.cameraY, 0, 1, 1, 0, 0)
         end
         
     end
@@ -512,6 +523,9 @@ function editor:Draw()
         elseif currentPlatform.T == 3 then
             love.graphics.setColor(1, 1, 1, 0.5)
             love.graphics.draw(sprites.Checkpoint, currentPlatform.X - self.cameraX, currentPlatform.Y - self.cameraY,0, 1, 1, 12.5, 25)
+        elseif currentPlatform.T == 4 then
+            love.graphics.setColor(1, 1, 1, 0.5)
+            love.graphics.draw(sprites.Finish, currentPlatform.X - self.cameraX, currentPlatform.Y - self.cameraY,0, 1, 1, 0, 0)
         end
     end
     

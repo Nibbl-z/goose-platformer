@@ -1,39 +1,9 @@
-local pause = {}
+local win = {}
 
-pause.paused = false
-local collision = require("modules.collision")
-local menu = require("modules.menu")
-local mapLoader = require("modules.mapLoader")
-local editor = require("modules.editor")
-
-
-
-local buttons = {
-    {
-        Sprite = "Resume",
-        Transform = {10, 60, 300, 150},
-        Callback = function ()
-            pause.paused = false
-        end
-    },
-    
-    {
-        Sprite = "Menu",
-        Transform = {10, 220, 300, 150},
-        Callback = function ()
-            mapLoader:Unload()
-            pause.paused = false
-            editor.enabled = false
-            menu:Reset()
-            menu:RefreshLevels()
-            menu.enabled = true
-        end
-    }
-}
+win.enabled = false
 
 local sprites = {
-    Paused = "paused.png",
-    Resume = "resume.png",
+    Winner = "winner.png",
     Menu = "menu.png"
 }
 
@@ -41,8 +11,25 @@ local sounds = {
     Select = {"select.wav", "static"}
 }
 
+local collision = require("modules.collision")
+local menu
+local mapLoader = require("modules.mapLoader")
 
-function pause:Init()
+local buttons = {
+    {
+        Sprite = "Menu",
+        Transform = {10, 220, 300, 150},
+        Callback = function ()
+            mapLoader:Unload()
+            menu:Reset()
+            menu:RefreshLevels()
+            menu.enabled = true
+            win.enabled = false
+        end
+    }
+}
+
+function win:Init()
     for name, sprite in pairs(sprites) do
         sprites[name] = love.graphics.newImage("/img/"..sprite)
     end
@@ -50,10 +37,13 @@ function pause:Init()
     for name, sound in pairs(sounds) do
         sounds[name] = love.audio.newSource("/audio/"..sound[1], sound[2])
     end
+
+    menu = require("modules.menu")
 end
 
-function pause:mousepressed(x, y, button)
-    if self.paused == false then return end
+
+function win:mousepressed(x, y, button)
+    if self.enabled == false then return end
     if button ~= 1 then return end
     
     for _, b in ipairs(buttons) do
@@ -66,12 +56,12 @@ function pause:mousepressed(x, y, button)
     end
 end
 
-function pause:Draw()
+function win:Draw()
     love.graphics.setColor(0,0,0,0.5)
     love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
     love.graphics.setColor(1,1,1,1)
     
-    love.graphics.draw(sprites.Paused, 0, 0)
+    love.graphics.draw(sprites.Winner, 0, 0)
     
     for _, b in ipairs(buttons) do
         love.graphics.draw(sprites[b.Sprite], b.Transform[1], b.Transform[2])
@@ -79,6 +69,4 @@ function pause:Draw()
 end
 
 
-
-
-return pause
+return win

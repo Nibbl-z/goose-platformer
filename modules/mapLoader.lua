@@ -60,6 +60,9 @@ function mapLoader:Load(filename)
         elseif platform.T == 3 then
             p.fixture:setUserData("checkpoint")
             p.fixture:setMask(1,2)
+        elseif platform.T == 4 then
+            p.fixture:setUserData("finish")
+            p.fixture:setMask(1,2)
         end
         
         p.fixture:setRestitution(0)

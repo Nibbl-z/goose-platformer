@@ -27,7 +27,10 @@ player.camSpeed = 500
 player.checkpointX = 200
 player.checkpointY = 0
 
+player.disableMovement = false
+
 local collision = require("modules.collision")
+local win = require("modules.win")
 
 local jumped = false
 
@@ -51,6 +54,8 @@ end
 function player:Update(dt, map)
     -- Movement
     
+    
+
     if love.keyboard.isDown("r") then
         self:Respawn()
     end
@@ -68,6 +73,17 @@ function player:Update(dt, map)
             ) then
                 self.checkpointX = p.X
                 self.checkpointY = p.Y
+                break
+            end
+        end
+
+        if p.T == 4 then
+            if collision:CheckCollision(
+                self.body:getX(), self.body:getY(), 52, 56,
+                p.X, p.Y, p.W, p.H
+            ) then
+                win.enabled = true
+                self.disableMovement = true
                 break
             end
         end
@@ -95,17 +111,21 @@ function player:Update(dt, map)
                     self.direction = -1
                 end
             end
-
-            self.body:applyLinearImpulse(impulseX, impulseY)
+            
+            if not self.disableMovement then 
+                self.body:applyLinearImpulse(impulseX, impulseY)
+            end
         end
     end
 
     local velX, velY = self.body:getLinearVelocity()
-
+    
     if velX > self.maxSpeed then velX = self.maxSpeed 
     elseif velX < -self.maxSpeed then velX = -self.maxSpeed end
     
-    self.body:setLinearVelocity(velX, velY)
+    if not self.disableMovement then 
+        self.body:setLinearVelocity(velX, velY)
+    end
     
     cX = lerp(cX, self.body:getX(), 0.1)
     cY = lerp(cY, self.body:getY(), 0.1)
@@ -127,6 +147,14 @@ end
 
 function player:Death()
     sounds.Death:play()
+end
+
+
+function player:ResetCheckpoint()
+    self.checkpointX = 200
+    self.checkpointY = 0
+
+    self.disableMovement = false
 end
 
 function player:Respawn()
