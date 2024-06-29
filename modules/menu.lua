@@ -7,15 +7,19 @@ local sprites = {
     NewLevel = "newlevel.png",
     DeleteLevel = "deletelevel.png",
     Left = "left.png",
-    Right = "right.png"
+    Right = "right.png",
+    Rename = "rename.png"
 }
 
 local sounds = {
-    Select = {"select.wav", "static"}
+    Select = {"select.wav", "static"},
+    Delete = {"delete.wav", "static"}
 }
 
 menu.enabled = true
 menu.settingLevelName = false
+
+local levelToRename
 
 local name = ""
 
@@ -37,6 +41,9 @@ local buttons = {
         Sprite = "Play",
         Transform = {60, 370, 300, 225},
         Callback = function ()
+
+            if levelList[currentLevel] == nil then return end
+
             love.filesystem.setIdentity("goose-platformer")
             sounds.Select:play()
             mapLoader:Load(levelList[currentLevel])
@@ -50,6 +57,8 @@ local buttons = {
         Sprite = "Editor",
         Transform = {love.graphics.getWidth() - 360, 370, 300, 225},
         Callback = function ()
+            if levelList[currentLevel] == nil then return end
+
             tab = "editor"
             sounds.Select:play()
             love.filesystem.setIdentity("goose-platformer")
@@ -74,6 +83,8 @@ local buttons = {
         Sprite = "DeleteLevel",
         Transform = {130, 250, 50, 50},
         Callback = function ()
+            if levelList[currentLevel] == nil then return end
+            
             local result = love.window.showMessageBox(
                 "Confirm Delete", 
                 "Are you sure you want to delete "..string.sub(levelList[currentLevel], 1, -7).."?",
@@ -83,7 +94,9 @@ local buttons = {
             )
             
             if result == 2 then
-                love.filesystem.remove(levelList[currentLevel])
+                sounds.Delete:play()
+
+                local result = love.filesystem.remove(levelList[currentLevel])
 
                 for i, v in ipairs(levelList) do
                     if v == levelList[currentLevel] then 
@@ -95,6 +108,18 @@ local buttons = {
                     currentLevel = 1
                 end
             end
+        end
+    },
+
+    {
+        Sprite = "Rename",
+        Transform = {190, 250, 50, 50},
+        Callback = function ()
+            if levelList[currentLevel] == nil then return end
+            levelToRename = levelList[currentLevel]
+            menu.settingLevelName = true
+            sounds.Select:play()
+            
         end
     },
 
@@ -147,16 +172,21 @@ function menu:DrawLevelList()
     
     
     love.graphics.setFont(font)
-
+    
     if self.settingLevelName then
         love.graphics.printf(name.."|", 70, 120, love.graphics.getWidth() - 120)
     else
         if #levelList > 0 then
             love.graphics.printf(string.sub(levelList[currentLevel], 1, -7), 70, 120, love.graphics.getWidth() - 120)
+        else
+            love.graphics.printf("Press the + button to create your first level!", 70, 120, love.graphics.getWidth() - 120)
         end
     end
     
-    love.graphics.printf(tostring(currentLevel).."/"..tostring(#levelList), love.graphics.getWidth() - 370, 250, 300, "right")
+    if #levelList > 0 then
+        love.graphics.printf(tostring(currentLevel).."/"..tostring(#levelList), love.graphics.getWidth() - 370, 250, 300, "right")
+    end
+    
 end
 
 function menu:Load()
@@ -203,13 +233,30 @@ function menu:HandleTypingKey(key, scancode, rep)
     
     if scancode == "return" then
         love.filesystem.setIdentity("goose-platformer")
-        local newFile = love.filesystem.newFile(name..".goose")
+
+        if levelToRename == nil then
+            local newFile = love.filesystem.newFile(name..".goose")
             
-        newFile:open("w")
-        newFile:write("")
-
-       
-
+            newFile:open("w")
+            newFile:write("")
+            newFile:close()
+        else
+            local oldFile = love.filesystem.newFile(levelToRename)
+            oldFile:open("r")
+            print(levelToRename)
+            local levelData = oldFile:read()
+            print(levelData)
+            oldFile:close()
+            
+            love.filesystem.remove(levelToRename)
+            
+            local newFile = love.filesystem.newFile(name..".goose")
+            
+            newFile:open("w")
+            newFile:write(levelData)
+            newFile:close()
+        end
+        
         self.settingLevelName = false
         self:RefreshLevels()
 
@@ -218,8 +265,9 @@ function menu:HandleTypingKey(key, scancode, rep)
                 currentLevel = i
             end
         end
-
+        
         name = ""
+        levelToRename = nil
     end
 end
 
