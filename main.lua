@@ -1,6 +1,7 @@
 local sprites = {
     Player = "player.png",
     Lava = "lava.png",
+    Checkpoint = "checkpoint.png"
 }
 
 local world = love.physics.newWorld(0, 1000, true)
@@ -86,9 +87,12 @@ function love.draw()
             if p.T == 1 then
                 love.graphics.setColor(p.R, p.G, p.B, 1)
                 love.graphics.rectangle("fill", p.X - player.cameraX, p.Y - player.cameraY, p.W, p.H, 10, 10)
-            else
+            elseif p.T == 2 then
                 love.graphics.setColor(1,1,1, 1)
                 love.graphics.draw(sprites.Lava, p.X - player.cameraX, p.Y - player.cameraY, 0, p.W/ 100, p.H / 100)
+            elseif p.T == 3 then
+                love.graphics.setColor(1,1,1, 1)
+                love.graphics.draw(sprites.Checkpoint, p.X - player.cameraX, p.Y - player.cameraY, 0, 1, 1, 12.5, 25)
             end
         end
     end

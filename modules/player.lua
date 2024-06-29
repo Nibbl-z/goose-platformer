@@ -6,7 +6,6 @@ local camDirections = {
 }
 
 local sounds = {
-    Jump = {"jump.wav", "static"},
     Death = {"death.wav", "static"}
 }
 
@@ -24,6 +23,9 @@ local cX, cY = 0, 0
 player.camOffsetX = 400
 player.camOffsetY = 200
 player.camSpeed = 500
+
+player.checkpointX = 200
+player.checkpointY = 0
 
 local collision = require("modules.collision")
 
@@ -58,15 +60,18 @@ function player:Update(dt, map)
     
     self.onGround = false
     
-    --[[for _, p in ipairs(map) do
-        if collision:CheckCollision(
-            self.body:getX() - 2, self.body:getY(), 52, 56,
-            p.X, p.Y, p.W, p.H
-        ) then
-            self.onGround = true
-            break
+    for _, p in ipairs(map) do
+        if p.T == 3 then
+            if collision:CheckCollision(
+                self.body:getX(), self.body:getY(), 52, 56,
+                p.X, p.Y, p.W, p.H
+            ) then
+                self.checkpointX = p.X
+                self.checkpointY = p.Y
+                break
+            end
         end
-    end]]
+    end
 
     if #self.body:getContacts() >= 1 then
         self.onGround = true
@@ -77,9 +82,7 @@ function player:Update(dt, map)
             local impulseX = 0
             local impulseY = 0
             
-            if key == "space" and self.onGround and not jumped then
-                sounds.Jump:play()
-
+            if key == "space" and self.onGround and not jumped then        
                 impulseY = self.jumpHeight * mult[2]
 
                 jumped = true
@@ -128,9 +131,9 @@ end
 
 function player:Respawn()
     self.body:setLinearVelocity(0,0)
-
-    self.body:setX(200)
-    self.body:setY(0)
+    
+    self.body:setX(self.checkpointX)
+    self.body:setY(self.checkpointY)
 end
 
 return player

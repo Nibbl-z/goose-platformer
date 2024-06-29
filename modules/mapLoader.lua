@@ -57,6 +57,9 @@ function mapLoader:Load(filename)
             p.fixture:setUserData("platform")
         elseif platform.T == 2 then
             p.fixture:setUserData("lava")
+        elseif platform.T == 3 then
+            p.fixture:setUserData("checkpoint")
+            p.fixture:setMask(1,2)
         end
         
         p.fixture:setRestitution(0)

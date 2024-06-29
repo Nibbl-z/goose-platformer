@@ -56,8 +56,28 @@ local buttons = {
         end
     },
     {
-        Sprite = "MoveMode",
+        Sprite = "CheckpointMode",
         Transform = {110, 2, 50, 50},
+        IsEnabled = function ()
+            if mode == "checkpoint" then return true else return false end
+        end,
+        Callback = function ()
+            mode = "checkpoint"
+        end
+    },
+    {
+        Sprite = "FinishMode",
+        Transform = {164, 2, 50, 50},
+        IsEnabled = function ()
+            if mode == "finish" then return true else return false end
+        end,
+        Callback = function ()
+            mode = "finish"
+        end
+    },
+    {
+        Sprite = "MoveMode",
+        Transform = {218, 2, 50, 50},
         IsEnabled = function ()
             if mode == "move" then return true else return false end
         end,
@@ -67,7 +87,7 @@ local buttons = {
     },
     {
         Sprite = "ScaleMode",
-        Transform = {164, 2, 50, 50},
+        Transform = {272, 2, 50, 50},
         IsEnabled = function ()
             if mode == "scale" then return true else return false end
         end,
@@ -77,7 +97,7 @@ local buttons = {
     },
     {
         Sprite = "PaintMode",
-        Transform = {218, 2, 50, 50},
+        Transform = {326, 2, 50, 50},
         IsEnabled = function ()
             if mode == "paint" then return true else return false end
         end,
@@ -87,7 +107,7 @@ local buttons = {
     },
     {
         Sprite = "ColorPickMode",
-        Transform = {272, 2, 50, 50},
+        Transform = {380, 2, 50, 50},
         IsEnabled = function ()
             if mode == "colorpick" then return true else return false end
         end,
@@ -97,7 +117,7 @@ local buttons = {
     },
     {
         Sprite = "DeleteMode",
-        Transform = {326, 2, 50, 50},
+        Transform = {434, 2, 50, 50},
         IsEnabled = function ()
             if mode == "delete" then return true else return false end
         end,
@@ -107,7 +127,7 @@ local buttons = {
     },
     {
         Sprite = "Save",
-        Transform = {380, 2, 50, 50},
+        Transform = {488, 2, 50, 50},
         IsEnabled = function ()
             return false
         end,
@@ -180,6 +200,8 @@ local rgbaSliders = {
 local sprites = {
     SpawnPoint = "player.png",
     PlaceMode = "place_mode.png",
+    CheckpointMode = "checkpointmode.png",
+    FinishMode = "finishmode.png",
     MoveMode = "move_mode.png",
     ScaleMode = "scale_mode.png",
     DeleteMode = "delete_mode.png",
@@ -191,7 +213,8 @@ local sprites = {
     Hue = "hue.png",
     Saturation = "saturation.png",
     Brightness = "brightness.png",
-    Slider = "slider.png"
+    Slider = "slider.png",
+    Checkpoint = "checkpoint.png"
 }
 
 local sounds = {
@@ -288,7 +311,7 @@ function editor:mousepressed(x, y, button)
         sounds.Placing:setLooping(true)
         sounds.Placing:play()
     end
-
+    
     if mode == "place" then
         
 
@@ -353,6 +376,17 @@ function editor:mousepressed(x, y, button)
                 break
             end
         end
+    elseif mode == "checkpoint" then
+        currentPlatform = {}
+        currentPlatform.X = x + editor.cameraX
+        currentPlatform.Y = y + editor.cameraY
+        currentPlatform.W = 50
+        currentPlatform.H = 25
+        currentPlatform.T = 3
+
+        table.insert(map, currentPlatform)
+
+        currentPlatform = nil
     end
 end
 
@@ -459,9 +493,12 @@ function editor:Draw()
         if p.T == 1 then
             love.graphics.setColor(p.R, p.G, p.B, 1)
             love.graphics.rectangle("fill", p.X - self.cameraX, p.Y - self.cameraY, p.W, p.H, 10, 10)
-        else
+        elseif p.T == 2 then
             love.graphics.setColor(1,1,1,1)
             love.graphics.draw(sprites.Lava, p.X - self.cameraX, p.Y - self.cameraY, 0, p.W/ 100, p.H / 100)
+        elseif p.T == 3 then
+            love.graphics.setColor(1,1,1,1)
+            love.graphics.draw(sprites.Checkpoint, p.X - self.cameraX, p.Y - self.cameraY, 0, 1, 1, 12.5, 25)
         end
         
     end
@@ -472,6 +509,9 @@ function editor:Draw()
         elseif currentPlatform.T == 2 then
             love.graphics.setColor(1, 1, 1, 0.5)
             love.graphics.draw(sprites.Lava, currentPlatform.X - self.cameraX, currentPlatform.Y - self.cameraY, 0, currentPlatform.W / 100, currentPlatform.H / 100)
+        elseif currentPlatform.T == 3 then
+            love.graphics.setColor(1, 1, 1, 0.5)
+            love.graphics.draw(sprites.Checkpoint, currentPlatform.X - self.cameraX, currentPlatform.Y - self.cameraY,0, 1, 1, 12.5, 25)
         end
     end
     
