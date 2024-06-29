@@ -6,7 +6,8 @@ local sprites = {
 }
 
 local sounds = {
-    Gameplay = {"goose.mp3", "stream"}
+    Gameplay = {"goose.mp3", "stream"},
+    Menu = {"menu.mp3", "stream"}
 }
 
 local world = love.physics.newWorld(0, 1000, true)
@@ -77,6 +78,14 @@ function love.update(dt)
         sounds.Gameplay:play()
     else
         sounds.Gameplay:stop()
+    end
+
+    if menu.enabled == true then
+        sounds.Menu:setVolume(0.5)
+        sounds.Menu:setLooping(true)
+        sounds.Menu:play()
+    else
+        sounds.Menu:stop()
     end
 
     if editor.enabled == false and menu.enabled == false and pause.paused == false then
