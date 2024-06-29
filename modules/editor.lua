@@ -466,7 +466,7 @@ function love.mousereleased(x, y, button)
     table.insert(map, currentPlatform)
     
     currentPlatform = nil
-
+    
     print(mapLoader:TableToGoose(map))
 end
 

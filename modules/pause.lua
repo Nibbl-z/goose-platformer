@@ -5,7 +5,7 @@ local collision = require("modules.collision")
 local menu = require("modules.menu")
 local mapLoader = require("modules.mapLoader")
 local editor = require("modules.editor")
-
+local player = require("modules.player")
 
 
 local buttons = {
@@ -16,10 +16,20 @@ local buttons = {
             pause.paused = false
         end
     },
+
+    {
+        Sprite = "Restart",
+        Transform = {10, 220, 300, 150},
+        Callback = function ()
+            player:ResetCheckpoint()
+            player:Respawn()
+            pause.paused = false
+        end
+    },
     
     {
         Sprite = "Menu",
-        Transform = {10, 220, 300, 150},
+        Transform = {10, 380, 300, 150},
         Callback = function ()
             mapLoader:Unload()
             pause.paused = false
@@ -28,12 +38,14 @@ local buttons = {
             menu:RefreshLevels()
             menu.enabled = true
         end
-    }
+    },
+    
 }
 
 local sprites = {
     Paused = "paused.png",
     Resume = "resume.png",
+    Restart = "restart.png",
     Menu = "menu.png"
 }
 

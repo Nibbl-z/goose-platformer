@@ -6,7 +6,9 @@ local camDirections = {
 }
 
 local sounds = {
-    Death = {"death.wav", "static"}
+    Death = {"death.wav", "static"},
+    Checkpoint = {"checkpoint.wav", "static"},
+    Finish = {"finish.wav", "static"}
 }
 
 player.speed = 5000
@@ -71,6 +73,9 @@ function player:Update(dt, map)
                 self.body:getX(), self.body:getY(), 52, 56,
                 p.X, p.Y, p.W, p.H
             ) then
+                if self.checkpointX ~= p.X and self.checkpointY ~= p.Y then
+                    sounds.Checkpoint:play()
+                end
                 self.checkpointX = p.X
                 self.checkpointY = p.Y
                 break
@@ -82,6 +87,10 @@ function player:Update(dt, map)
                 self.body:getX(), self.body:getY(), 52, 56,
                 p.X, p.Y, p.W, p.H
             ) then
+                if not win.enabled then
+                    sounds.Finish:play()
+                end
+
                 win.enabled = true
                 self.disableMovement = true
                 break
