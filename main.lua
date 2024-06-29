@@ -5,6 +5,10 @@ local sprites = {
     Finish = "finish.png"
 }
 
+local sounds = {
+    Gameplay = {"goose.mp3", "stream"}
+}
+
 local world = love.physics.newWorld(0, 1000, true)
 local player = require("modules.player")
 local mapLoader = require("modules.mapLoader")
@@ -18,6 +22,10 @@ local respawnDelay = false
 function love.load()
     for name, sprite in pairs(sprites) do
         sprites[name] = love.graphics.newImage("/img/"..sprite)
+    end
+
+    for name, sound in pairs(sounds) do
+        sounds[name] = love.audio.newSource("/audio/"..sound[1], sound[2])
     end
     
     world:setCallbacks(beginContact, endContact)
@@ -63,6 +71,14 @@ function love.mousepressed(x, y, button)
 end
 
 function love.update(dt)
+    if editor.enabled == false and menu.enabled == false then
+        sounds.Gameplay:setVolume(0.5)
+        sounds.Gameplay:setLooping(true)
+        sounds.Gameplay:play()
+    else
+        sounds.Gameplay:stop()
+    end
+
     if editor.enabled == false and menu.enabled == false and pause.paused == false then
         world:update(dt)
         player:Update(dt, mapLoader.data)
