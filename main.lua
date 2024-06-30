@@ -74,7 +74,11 @@ end
 
 function love.update(dt)
     if editor.enabled == true then
-        sounds.Editor:setVolume(0.5)
+        if pause.paused then
+            sounds.Editor:setVolume(0.3)
+        else
+            sounds.Editor:setVolume(0.5)
+        end
         sounds.Editor:setLooping(true)
         sounds.Editor:play()
     else
@@ -82,7 +86,12 @@ function love.update(dt)
     end
     
     if editor.enabled == false and menu.enabled == false then
-        sounds.Gameplay:setVolume(0.5)
+        if pause.paused then
+            sounds.Gameplay:setVolume(0.3)
+        else
+            sounds.Gameplay:setVolume(0.5)
+        end
+        
         sounds.Gameplay:setLooping(true)
         sounds.Gameplay:play()
     else
