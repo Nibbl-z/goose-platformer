@@ -7,7 +7,8 @@ local sprites = {
 
 local sounds = {
     Gameplay = {"goose.mp3", "stream"},
-    Menu = {"menu.mp3", "stream"}
+    Menu = {"menu.mp3", "stream"},
+    Editor = {"editor.mp3", "stream"}
 }
 
 local world = love.physics.newWorld(0, 1000, true)
@@ -72,6 +73,14 @@ function love.mousepressed(x, y, button)
 end
 
 function love.update(dt)
+    if editor.enabled == true then
+        sounds.Editor:setVolume(0.5)
+        sounds.Editor:setLooping(true)
+        sounds.Editor:play()
+    else
+        sounds.Editor:stop()
+    end
+
     if editor.enabled == false and menu.enabled == false then
         sounds.Gameplay:setVolume(0.5)
         sounds.Gameplay:setLooping(true)
