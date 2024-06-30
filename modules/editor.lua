@@ -557,7 +557,7 @@ function editor:Draw()
 
         local r,g,b = HSVtoRGB(hue, saturation, brightness)
         love.graphics.setColor(r,g,b,1)
-        love.graphics.rectangle("fill", 10, 200, 20, 20)
+        love.graphics.rectangle("fill", 10, 140, 25, 25)
     end
     
     

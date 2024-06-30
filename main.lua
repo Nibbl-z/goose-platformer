@@ -80,7 +80,7 @@ function love.update(dt)
     else
         sounds.Editor:stop()
     end
-
+    
     if editor.enabled == false and menu.enabled == false then
         sounds.Gameplay:setVolume(0.5)
         sounds.Gameplay:setLooping(true)
