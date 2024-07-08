@@ -18,6 +18,7 @@ local editor = require("modules.editor")
 local menu = require("modules.menu")
 local pause = require("modules.pause")
 local win = require("modules.win")
+local sock = require("modules.sock")
 
 local respawnDelay = false
 

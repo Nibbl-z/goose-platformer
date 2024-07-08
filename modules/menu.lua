@@ -8,7 +8,10 @@ local sprites = {
     DeleteLevel = "deletelevel.png",
     Left = "left.png",
     Right = "right.png",
-    Rename = "rename.png"
+    Rename = "rename.png",
+    Online = "online.png",
+    Host = "host.png",
+    Join = "join.png"
 }
 
 local sounds = {
@@ -27,6 +30,8 @@ local collision = require("modules.collision")
 local mapLoader = require("modules.mapLoader")
 local player = require("modules.player")
 local editor = require("modules.editor")
+local sock = require("modules.sock")
+local server = require("modules.server")
 local levelList = {}
 local levelButtons = {}
 
@@ -39,7 +44,7 @@ local currentLevel = 1
 local buttons = {
     {
         Sprite = "Play",
-        Transform = {60, 370, 300, 225},
+        Transform = {20, 370, 225, 169},
         Callback = function ()
 
             if levelList[currentLevel] == nil then return end
@@ -55,7 +60,7 @@ local buttons = {
     
     {
         Sprite = "Editor",
-        Transform = {love.graphics.getWidth() - 360, 370, 300, 225},
+        Transform = {275, 370, 225, 169},
         Callback = function ()
             if levelList[currentLevel] == nil then return end
 
@@ -67,6 +72,26 @@ local buttons = {
             editor.enabled = true
             editor:Load(levelList[currentLevel])
             menu.enabled = false
+        end
+    },
+
+    {
+        Sprite = "Online",
+        Transform = {530, 370, 225, 169},
+        Callback = function ()
+            if levelList[currentLevel] == nil then return end
+            
+            sounds.Select:play()
+
+            server:Start()
+            --[[love.filesystem.setIdentity("goose-platformer")
+            
+            
+
+            --mapLoader:Load(levelList[currentLevel])
+            editor.enabled = true
+            editor:Load(levelList[currentLevel])
+            menu.enabled = false]]
         end
     },
     

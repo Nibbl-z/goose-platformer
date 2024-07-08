@@ -97,7 +97,7 @@ function player:Update(dt, map)
             end
         end
     end
-
+    
     if #self.body:getContacts() >= 1 then
         self.onGround = true
     end
