@@ -10,7 +10,6 @@ Created levels are saved in AppData > Roaming > goose-platformer.
 - Space to jump
 - R to restart at last checkpoint
 - Escape to pause
-- More information
 
 ### Installation:
 
