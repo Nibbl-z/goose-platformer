@@ -22,9 +22,22 @@ app.get('/getLevelList', (req, res) => {
         })
 
         console.log(levelNames)
+    
+        res.send(levelNames)
     })
-    
-    
+})
+
+app.get("/getLevelData", (req, res) => {
+    let name = req.query.name
+
+    fs.readFile("./gooseFiles/".concat(name).concat(".goose"), "utf8", (err, data) => {
+        if (err) {
+            console.error(err)
+            return
+        }
+        
+        res.send(data)
+    })
 })
 
 app.listen(3000, () => { 
