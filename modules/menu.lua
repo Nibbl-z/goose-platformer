@@ -159,7 +159,7 @@ local buttons = {
         Callback = function ()
             sounds.Select:play()
             levelList = {}
-            local code, body = https.request("http://localhost:3500/getLevelList/", {method = "GET"})
+            local code, body = https.request("http://localhost:3500/levels/", {method = "GET"})
             body = string.sub(body, 2, -2)
             for _, v in ipairs(str:split(body, ",")) do
                 print(v)

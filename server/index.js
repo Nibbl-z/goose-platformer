@@ -2,58 +2,36 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
 const fs = require('fs')
+const path = require("path")
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
-app.get('/getLevelList', (req, res) => {
-    let levelNames = []
+const apiPath = path.join(__dirname, "api")
+const apiFiles = fs.readdirSync(apiPath).filter(file => file.endsWith('.js'))
 
-    fs.readdir("./gooseFiles", (err, files) => {
-        if (err) {
-            console.error(err)
-            return
-        }
-        
+// TODO use a database
 
-        files.forEach((item) => {
-            console.log("Hai!")
-            levelNames.push(item.toString().slice(0,-6))
+for (const file of apiFiles) {
+    const filePath = path.join(apiPath, file)
+    const data = require(filePath)
+
+    if(data?.method && data?.route && data?.controller) {
+        app[data.method](data.route, ...data.middleware, (req, res, ...params) => {
+            try {
+                data.controller(req, res, ...params)
+            } catch(err) {
+                console.log(`❌ | An error occurred while trying to execute the API route ${data.method.toUpperCase()} ${data.route}: ${err}`)
+                res.status(500).json({success: false, message: "Internal server error."})
+            }
         })
+        console.log(`✅ | API route ${data.method.toUpperCase()} ${data.route} has been loaded successfully!`)
+    } else {
+        console.log(`❌ | The API route ${file} is missing "method", "route" or "controller" properties.`)
+    }
+}
 
-        console.log(levelNames)
-    
-        res.send(levelNames)
-    })
-})
 
-app.get("/getLevelData", (req, res) => {
-    let name = req.query.name
-
-    fs.readFile("./gooseFiles/".concat(name).concat(".goose"), "utf8", (err, data) => {
-        if (err) {
-            console.error(err)
-            return
-        }
-        
-        res.send(data)
-    })
-})
-
-app.get("/uploadLevel", (req, res) => {
-    let name = req.query.name
-    let data = req.query.data
-
-    fs.writeFile("./gooseFiles/".concat(name).concat(".goose"), data, err => {
-        if (err) {
-            console.error(err)
-            return
-        }
-        
-        res.send("Uploaded Successfully!")
-    })
-})
-
-app.listen(3500, () => { 
-    console.log('Listening!')
+app.listen(process.env.PORT || 3500, () => { 
+    console.log('👂 | Listening!')
 })
