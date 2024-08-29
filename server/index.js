@@ -40,6 +40,20 @@ app.get("/getLevelData", (req, res) => {
     })
 })
 
+app.get("/uploadLevel", (req, res) => {
+    let name = req.query.name
+    let data = req.query.data
+
+    fs.writeFile("./gooseFiles/".concat(name).concat(".goose"), data, err => {
+        if (err) {
+            console.error(err)
+            return
+        }
+
+        res.send("Uploaded Successfully!")
+    })
+})
+
 app.listen(3000, () => { 
     console.log('Listening!')
 })
