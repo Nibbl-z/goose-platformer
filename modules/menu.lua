@@ -8,7 +8,8 @@ local sprites = {
     DeleteLevel = "deletelevel.png",
     Left = "left.png",
     Right = "right.png",
-    Rename = "rename.png"
+    Rename = "rename.png",
+    Online = "onlinebutton.png"
 }
 
 local sounds = {
@@ -27,6 +28,9 @@ local collision = require("modules.collision")
 local mapLoader = require("modules.mapLoader")
 local player = require("modules.player")
 local editor = require("modules.editor")
+local https = require("https")
+local str = require("modules.str")
+
 local levelList = {}
 local levelButtons = {}
 
@@ -135,7 +139,7 @@ local buttons = {
             end
         end
     },
-
+    
     {
         Sprite = "Right",
         Transform = {love.graphics.getWidth() - 55, 110, 50, 200},
@@ -145,6 +149,21 @@ local buttons = {
 
             if currentLevel > #levelList then
                 currentLevel = 1
+            end
+        end
+    },
+     
+    {
+        Sprite = "Online",
+        Transform = {love.graphics.getWidth() - 55, 5, 50, 50},
+        Callback = function ()
+            sounds.Select:play()
+            levelList = {}
+            local code, body = https.request("http://localhost:3500/getLevelList/", {method = "GET"})
+            body = string.sub(body, 2, -2)
+            for _, v in ipairs(str:split(body, ",")) do
+                print(v)
+                table.insert(levelList, string.sub(v, 2, -2))
             end
         end
     }
