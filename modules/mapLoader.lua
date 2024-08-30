@@ -42,10 +42,14 @@ function mapLoader:Init(w)
     world = w
 end
 
-function mapLoader:Load(filename)
+function mapLoader:Load(filename, online)
     love.filesystem.setIdentity("goose-platformer")
     
-    self.data = mapLoader:GooseToTable(love.filesystem.read(filename))
+    if not online then
+        self.data = mapLoader:GooseToTable(love.filesystem.read(filename))
+    else
+        self.data = mapLoader:GooseToTable(filename)
+    end
     
     for _, platform in ipairs(self.data) do
         local p = {}

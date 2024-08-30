@@ -10,14 +10,14 @@ app.use(bodyParser.urlencoded({ extended: true }))
 const apiPath = path.join(__dirname, "api")
 const apiFiles = fs.readdirSync(apiPath).filter(file => file.endsWith('.js'))
 
-// TODO use a database
+// TODO use a PHPMyAdmin
 
 for (const file of apiFiles) {
     const filePath = path.join(apiPath, file)
     const data = require(filePath)
-
+    
     if(data?.method && data?.route && data?.controller) {
-        app[data.method](data.route, ...data.middleware, (req, res, ...params) => {
+        app[data.method](data.route, ...data.middleware, (req, res, ...params) => { 
             try {
                 data.controller(req, res, ...params)
             } catch(err) {
@@ -32,6 +32,6 @@ for (const file of apiFiles) {
 }
 
 
-app.listen(process.env.PORT || 3500, () => { 
+app.listen(process.env.PORT || 3600, () => { 
     console.log('👂 | Listening!')
 })

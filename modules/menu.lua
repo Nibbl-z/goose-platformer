@@ -30,6 +30,7 @@ local player = require("modules.player")
 local editor = require("modules.editor")
 local https = require("https")
 local str = require("modules.str")
+local onlineMode = false
 
 local levelList = {}
 local levelButtons = {}
@@ -45,12 +46,22 @@ local buttons = {
         Sprite = "Play",
         Transform = {60, 370, 300, 225},
         Callback = function ()
-
+            
             if levelList[currentLevel] == nil then return end
 
             love.filesystem.setIdentity("goose-platformer")
             sounds.Select:play()
-            mapLoader:Load(levelList[currentLevel])
+            
+            if onlineMode then
+                print(levelList[currentLevel])
+                local _, body = https.request("http://localhost:3600/data/"..levelList[currentLevel], {method = "GET"})
+                print(body)
+                mapLoader:Load(body, true)
+            else
+                mapLoader:Load(levelList[currentLevel], false)
+            end
+            
+           
             player:ResetCheckpoint()
             player:Respawn()
             menu.enabled = false
@@ -157,9 +168,10 @@ local buttons = {
         Sprite = "Online",
         Transform = {love.graphics.getWidth() - 55, 5, 50, 50},
         Callback = function ()
+            onlineMode = true
             sounds.Select:play()
             levelList = {}
-            local code, body = https.request("http://localhost:3500/levels/", {method = "GET"})
+            local _, body = https.request("http://localhost:3600/levels/", {method = "GET"})
             body = string.sub(body, 2, -2)
             for _, v in ipairs(str:split(body, ",")) do
                 print(v)
@@ -169,20 +181,30 @@ local buttons = {
     }
 }
 
-
-
 local font
 
 function menu:RefreshLevels()
-    love.filesystem.setIdentity("goose-platformer")
-            
     levelList = {}
 
-    for _, v in ipairs(love.filesystem.getDirectoryItems("")) do
-        if v:match("^.+(%..+)$") == ".goose" then
-            table.insert(levelList, v)
+    if onlineMode then
+        local _, body = https.request("http://localhost:3600/levels/", {method = "GET"})
+        
+        body = string.sub(body, 2, -2)
+        for _, v in ipairs(str:split(body, ",")) do
+            print(v)
+            table.insert(levelList, string.sub(v, 2, -2))
+        end
+    else
+        love.filesystem.setIdentity("goose-platformer")
+    
+        for _, v in ipairs(love.filesystem.getDirectoryItems("")) do
+            if v:match("^.+(%..+)$") == ".goose" then
+                table.insert(levelList, v)
+            end
         end
     end
+
+    
 end
 
 function menu:DrawLevelList()
@@ -196,7 +218,12 @@ function menu:DrawLevelList()
         love.graphics.printf(name.."|", 70, 120, love.graphics.getWidth() - 120)
     else
         if #levelList > 0 then
-            love.graphics.printf(string.sub(levelList[currentLevel], 1, -7), 70, 120, love.graphics.getWidth() - 120)
+            if not onlineMode then
+                love.graphics.printf(string.sub(levelList[currentLevel], 1, -7), 70, 120, love.graphics.getWidth() - 120)
+            else
+                love.graphics.printf(levelList[currentLevel], 70, 120, love.graphics.getWidth() - 120)
+            end
+            
         else
             love.graphics.printf("Press the + button to create your first level!", 70, 120, love.graphics.getWidth() - 120)
         end
