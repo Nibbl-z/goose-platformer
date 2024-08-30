@@ -10,7 +10,8 @@ local sprites = {
     Right = "right.png",
     Rename = "rename.png",
     Online = "onlinebutton.png",
-    Offline = "localbutton.png"
+    Offline = "localbutton.png",
+    Upload = "upload.png"
 }
 
 local sounds = {
@@ -41,6 +42,16 @@ local utf8 = require("utf8")
 local tab = ""
 
 local currentLevel = 1
+
+local url = require("socket.url")
+
+function urlencode(list)
+	local result = {}
+	for k, v in pairs(list) do
+		result[#result + 1] = url.escape(k).."="..url.escape(v)
+	end
+	return table.concat(result, "&")
+end
 
 local buttons = {
     {
@@ -146,6 +157,24 @@ local buttons = {
             if levelList[currentLevel] == nil then return end
             levelToRename = levelList[currentLevel]
             menu.settingLevelName = true
+            sounds.Select:play()
+        end,
+        Visible = function ()
+            return not onlineMode
+        end
+    },
+
+    {
+        Sprite = "Upload",
+        Transform = {250, 250, 50, 50},
+        Callback = function ()
+            if levelList[currentLevel] == nil then return end
+            love.filesystem.setIdentity("goose-platformer")
+            local _, body = https.request(string.format("http://localhost:%s/upload/", tostring(require("settings").PORT)), 
+                {method = "POST", data = urlencode{["name"] = string.sub(levelList[currentLevel], 1, -7), ["data"] = love.filesystem.read(levelList[currentLevel])}}
+            )
+            print(body)
+
             sounds.Select:play()
         end,
         Visible = function ()
