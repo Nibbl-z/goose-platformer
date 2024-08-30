@@ -32,6 +32,6 @@ for (const file of apiFiles) {
 }
 
 
-app.listen(process.env.PORT || 3600, () => { 
+app.listen(process.env.PORT || 5134, () => { 
     console.log('👂 | Listening!')
 })

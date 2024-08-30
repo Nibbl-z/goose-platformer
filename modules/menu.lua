@@ -9,7 +9,8 @@ local sprites = {
     Left = "left.png",
     Right = "right.png",
     Rename = "rename.png",
-    Online = "onlinebutton.png"
+    Online = "onlinebutton.png",
+    Offline = "localbutton.png"
 }
 
 local sounds = {
@@ -54,7 +55,7 @@ local buttons = {
             
             if onlineMode then
                 print(levelList[currentLevel])
-                local _, body = https.request("http://localhost:3600/data/"..levelList[currentLevel], {method = "GET"})
+                local _, body = https.request(string.format("http://localhost:%s/data/", tostring(require("settings").PORT))..levelList[currentLevel], {method = "GET"})
                 print(body)
                 mapLoader:Load(body, true)
             else
@@ -65,6 +66,9 @@ local buttons = {
             player:ResetCheckpoint()
             player:Respawn()
             menu.enabled = false
+        end,
+        Visible = function ()
+            return true
         end
     },
     
@@ -82,6 +86,9 @@ local buttons = {
             editor.enabled = true
             editor:Load(levelList[currentLevel])
             menu.enabled = false
+        end,
+        Visible = function ()
+            return not onlineMode
         end
     },
     
@@ -91,6 +98,9 @@ local buttons = {
         Callback = function ()
             sounds.Select:play()
             menu.settingLevelName = true
+        end,
+        Visible = function ()
+            return not onlineMode
         end
     },
     
@@ -123,6 +133,9 @@ local buttons = {
                     currentLevel = 1
                 end
             end
+        end,
+        Visible = function ()
+            return not onlineMode
         end
     },
 
@@ -134,7 +147,9 @@ local buttons = {
             levelToRename = levelList[currentLevel]
             menu.settingLevelName = true
             sounds.Select:play()
-            
+        end,
+        Visible = function ()
+            return not onlineMode
         end
     },
 
@@ -148,6 +163,9 @@ local buttons = {
             if currentLevel <= 0 then
                 currentLevel = #levelList
             end
+        end,
+        Visible = function ()
+            return true
         end
     },
     
@@ -161,6 +179,9 @@ local buttons = {
             if currentLevel > #levelList then
                 currentLevel = 1
             end
+        end,
+        Visible = function ()
+            return true
         end
     },
      
@@ -168,15 +189,13 @@ local buttons = {
         Sprite = "Online",
         Transform = {love.graphics.getWidth() - 55, 5, 50, 50},
         Callback = function ()
-            onlineMode = true
+            onlineMode = not onlineMode
             sounds.Select:play()
-            levelList = {}
-            local _, body = https.request("http://localhost:3600/levels/", {method = "GET"})
-            body = string.sub(body, 2, -2)
-            for _, v in ipairs(str:split(body, ",")) do
-                print(v)
-                table.insert(levelList, string.sub(v, 2, -2))
-            end
+            
+            menu:RefreshLevels()      
+        end,
+        Visible = function ()
+            return true
         end
     }
 }
@@ -187,8 +206,8 @@ function menu:RefreshLevels()
     levelList = {}
 
     if onlineMode then
-        local _, body = https.request("http://localhost:3600/levels/", {method = "GET"})
-        
+        local _, body = https.request(string.format("http://localhost:%s/levels/", tostring(require("settings").PORT)), {method = "GET"})
+
         body = string.sub(body, 2, -2)
         for _, v in ipairs(str:split(body, ",")) do
             print(v)
@@ -323,9 +342,9 @@ function menu:mousepressed(x, y, button)
 
     for _, b in ipairs(buttons) do
         if collision:CheckCollision(x, y, 1, 1, b.Transform[1], b.Transform[2], b.Transform[3], b.Transform[4]) then
-            b.Callback()
-
-            
+            if b.Visible() then
+                b.Callback()
+            end
         end
     end
     for _, b in ipairs(levelButtons) do
@@ -344,7 +363,19 @@ function menu:Draw()
     love.graphics.draw(sprites.Logo, 0, 0)
     
     for _, b in ipairs(buttons) do
-        love.graphics.draw(sprites[b.Sprite], b.Transform[1], b.Transform[2])
+        if b.Visible() then
+            if b.Sprite == "Online" then
+                if onlineMode then
+                    love.graphics.draw(sprites.Offline, b.Transform[1], b.Transform[2])
+                else
+                    love.graphics.draw(sprites.Online, b.Transform[1], b.Transform[2])
+                end
+            else
+                love.graphics.draw(sprites[b.Sprite], b.Transform[1], b.Transform[2])
+            end
+            
+        end
+        
     end
 
     self:DrawLevelList()
