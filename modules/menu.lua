@@ -44,6 +44,8 @@ local tab = ""
 local currentLevel = 1
 
 local url = require("socket.url")
+local message = ""
+local messageDecayTime = -1
 
 function urlencode(list)
 	local result = {}
@@ -170,10 +172,20 @@ local buttons = {
         Callback = function ()
             if levelList[currentLevel] == nil then return end
             love.filesystem.setIdentity("goose-platformer")
-            local _, body = https.request(string.format("http://localhost:%s/upload/", tostring(require("settings").PORT)), 
+            local code, body = https.request(string.format("http://localhost:%s/upload/", tostring(require("settings").PORT)), 
                 {method = "POST", data = urlencode{["name"] = string.sub(levelList[currentLevel], 1, -7), ["data"] = love.filesystem.read(levelList[currentLevel])}}
             )
+
             print(body)
+            print(code)
+
+            if code == 200 then
+                message = "Level uploaded successfully!"
+            else
+                message = "Level failed to upload :("
+            end
+
+            messageDecayTime = love.timer.getTime() + 3
 
             sounds.Select:play()
         end,
@@ -232,6 +244,8 @@ local buttons = {
 local font
 
 function menu:RefreshLevels()
+    currentLevel = 1
+
     levelList = {}
 
     if onlineMode then
@@ -273,7 +287,12 @@ function menu:DrawLevelList()
             end
             
         else
-            love.graphics.printf("Press the + button to create your first level!", 70, 120, love.graphics.getWidth() - 120)
+            if not onlineMode then
+                love.graphics.printf("Press the + button to create your first level!", 70, 120, love.graphics.getWidth() - 120)
+            else
+                love.graphics.printf("There are no levels on the server! Try uploading one!", 70, 120, love.graphics.getWidth() - 120)
+            end
+            
         end
     end
     
@@ -402,12 +421,16 @@ function menu:Draw()
             else
                 love.graphics.draw(sprites[b.Sprite], b.Transform[1], b.Transform[2])
             end
-            
         end
-        
     end
-
+    love.graphics.setColor(0,0,0,1)
+    love.graphics.print(message, 60, 310)
+    
     self:DrawLevelList()
+    
+    if love.timer.getTime() > messageDecayTime and message ~= "" then
+        message = ""
+    end
 end
 
 return menu
