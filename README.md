@@ -4,6 +4,8 @@ Goose Platformer is a platformer game with a level editor. And a goose. That's i
 
 Created levels are saved in AppData > Roaming > goose-platformer.
 
+![Screenshot](https://cloud-ehr2r3e51-hack-club-bot.vercel.app/0image.png)
+
 ### Controls:
 
 - A/D to move
